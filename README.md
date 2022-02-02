@@ -40,6 +40,15 @@ cd GIF
 export GIF=$PWD
 ```
 
+### Clone the GIF Monitor Repository
+
+```bash
+cd $GIF_SANDBOX_ROOT
+git clone https://github.com/etherisc/gif-monitor.git
+cd gif-monitor
+export GIF_MONITOR=$PWD
+```
+
 ### Clone the GIF Sandbox Repository
 
 ```bash
@@ -51,16 +60,27 @@ export GIF_SANDBOX=$PWD
 
 ## Build Docker Images
 
+Use the commands below to build the ganache and truffle images
+
 ```bash
 cd $GIF_SANDBOX
-docker build ./docker/images/ganache -t ganache-gif
-docker build ./docker/images/truffle -t truffle-gif
+docker build ./docker/images/ganache -t gif-ganache
+docker build ./docker/images/truffle -t gif-truffle
+```
+
+And the following commands to build the GIF monitor
+
+```bash
+cd $GIF_MONITOR
+cp $GIF_SANDBOX/docker/env/.env.development ./.env
+cp $GIF_SANDBOX/docker/images/meteor/Dockerfile .
+docker build . -t gif-monitor
 ```
 
 ## Run Ganache
 
 ```bash
-docker run -p 7545:8545 -d --name ganache-gif ganache-gif
+docker run -p 7545:8545 -d --name ganache gif-ganache
 ```
 
 Port 7545 is chosen to avoid conflicts with any productive local ethereum client that typically run on port 8545.
@@ -86,7 +106,7 @@ Before compiling and deploying prepare and enter the truffle container as shown 
 ```bash
 cd $GIF_SANDBOX
 cp ./docker/env/.env.development $GIF/gif-contracts/.env
-docker run -it --rm -v $GIF/gif-contracts:/app truffle-gif bash
+docker run -it --rm -v $GIF/gif-contracts:/app gif-truffle bash
 ```
 
 In the running truffle container compile and deploy a GIF instance as shown below.
@@ -102,7 +122,27 @@ Based on the content of `resources.yml` the command `gif-tools select-resources`
 
 ```bash
 gif-tools select-resources
-npm install dotenv --save
 truffle compile --all
 truffle migrate --reset
 ```
+
+## Run the GIF Monitor
+
+Start the GIF monitor as shown below
+
+```bash
+docker run -p 8081:3000 -d --name gif-monitor gif-monitor
+```
+
+Starting up the GIF monitor takes a while.
+To monitor the startup progress you can use.
+
+```bash
+docker logs -f gif-monitor
+
+# the following output indicates that startup has completed
+=> Started your app.
+=> App running at: http://localhost:3000/
+```
+
+After startup open the GIF monitor application in the browser `http://localhost:8081`
