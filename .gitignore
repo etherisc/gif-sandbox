@@ -1,3 +1,6 @@
+# Truffle build artifacts
+build/
+
 # Logs
 logs
 *.log

@@ -1,0 +1,19 @@
+{
+    "name": "@etherisc/gif-sandbox",
+    "version": "0.0.1",
+    "homepage": "https://github.com/etherisc/gif-sandbox#README.md",
+    "repository": "github:etherisc/gif-sandbox.git",
+    "license": "Apache-2.0",
+    "settings": {
+      "solc": "0.7.6"
+    },
+    "files": [
+      "contracts/*"
+    ],
+    "dependencies": {
+      "@etherisc/gif-interface": "^1.1.43",
+      "@truffle/hdwallet-provider": "^1.0.37",
+      "dotenv": "^14.3.2"
+    }
+  }
+  
