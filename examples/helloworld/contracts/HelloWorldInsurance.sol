@@ -2,9 +2,10 @@
 pragma solidity 0.7.6;
 
 import "@etherisc/gif-interface/contracts/0.7/Product.sol";
+import "./IHelloWorldInsurance.sol";
 
 
-contract HelloWorldInsurance is Product {
+contract HelloWorldInsurance is IHelloWorldInsurance, Product {
 
     bytes32 public constant VERSION = "0.0.1";
     bytes32 public constant POLICY_FLOW = "PolicyFlowDefault";
@@ -26,11 +27,13 @@ contract HelloWorldInsurance is Product {
     mapping(bytes32 => address) public policyIdToAddress;
     mapping(address => bytes32[]) public addressToPolicyIds;
 
-    event LogGreetingRequest(uint256 requestId, bytes32 policyId, bytes32 greeting);
-    event LogGreetingCallback(uint256 requestId, bytes32 policyId, bytes response);
+    // events located in interface
+    // event LogGreetingPolicyCreated(bytes32 policyId);
+    // event LogGreetingRequest(uint256 requestId, bytes32 policyId, bytes32 greeting);
+    // event LogGreetingCallback(uint256 requestId, bytes32 policyId, bytes response);
 
-    event LogPayoutTransferred(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 amount);
-    event LogPolicyExpired(bytes32 policyId);
+    // event LogPayoutTransferred(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 amount);
+    // event LogPolicyExpired(bytes32 policyId);
 
     constructor(
         address gifProductService,
@@ -44,7 +47,7 @@ contract HelloWorldInsurance is Product {
         greetingsOracleId = oracleId;
     }
 
-    function applyForPolicy() external payable returns (bytes32 policyId) {
+    function applyForPolicy() external payable override returns (bytes32 policyId) {
 
         address payable policyHolder = msg.sender;
         uint256 premium = _getValue();
@@ -60,12 +63,14 @@ contract HelloWorldInsurance is Product {
         _newApplication(policyId, abi.encode(premium, policyHolder));
         _underwrite(policyId);
 
+        emit LogGreetingPolicyCreated(policyId);
+
         // Book keeping to simplify lookup
         policyIdToAddress[policyId] = policyHolder;
         addressToPolicyIds[policyHolder].push(policyId);
     }
 
-    function greet(bytes32 policyId, bytes32 greeting) external {
+    function greet(bytes32 policyId, bytes32 greeting) external override {
 
         // Validate input parameters
         require(policyIdToAddress[policyId] == msg.sender, "ERROR:HWI-003:INVALID_POLICY_OR_HOLDER");
@@ -98,7 +103,7 @@ contract HelloWorldInsurance is Product {
         emit LogPolicyExpired(policyId);
     }
 
-    function withdraw(uint256 amount) public onlyOwner {
+    function withdraw(uint256 amount) external override onlyOwner {
         require(amount <= address(this).balance);
 
         address payable receiver;
