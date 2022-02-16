@@ -66,6 +66,7 @@ Use the commands below to build the ganache and truffle images
 cd $GIF_SANDBOX
 docker build ./docker/images/ganache -t gif-ganache
 docker build ./docker/images/truffle -t gif-truffle
+docker build ./docker/images/brownie -t gif-brownie
 ```
 
 And the following commands to build the GIF monitor
@@ -126,20 +127,89 @@ truffle compile --all
 truffle migrate --reset
 ```
 
-Check the output of the `truffle migrate` command.
-You will need to save the registry address for the insurance product contract deployment later on.
-For this look for the relevant output shown below.
+`truffle migrate` will update deployment meta data in the `./build/*.json` files of the deployed contracts.
 
 ```bash
-Replacing 'Registry'
---------------------
-> transaction hash:    0x505d03b598b1ea2b173515bb962a699a9f5e3aee714461d14339c95f140c0f7c
-> Blocks: 0            Seconds: 0
-> contract address:    0x6B76731B504303A65488DBc138D7019C249B4216
+grep '"address":' build/*json
+```
+Use tha command above to extract the addresses of the deployed GIF contracts.
+The output of the grep command should then look similar to the example below.
+
+```bash
+...
+build/Query.json: "address": "0xB529f14AA8096f943177c09Ca294Ad66d2E08b1f",
+build/RegistryController.json: "address": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
+build/Registry.json: "address": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
 ```
 
 From the output shown above you need to look for the contract address shown.
-As a result the registry address in the example above is `0x627306090abaB3A6e1400e9345bC60c78a8BEf57`
+As a result the registry address in the example above is `0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF`
+
+
+## Deploy the "Hello World" Insurance
+
+Ensure that the DEV_GIF_REGISTRY variable in the dotenv file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
+
+```bash
+cd $GIF_SANDBOX
+nano ./docker/.env.development 
+```
+For the example GIF deploy above the relevant line in file should read
+
+```
+DEV_GIF_REGISTRY="0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF"
+```
+
+Now, create a truffle container.
+
+```bash
+cp ./docker/.env.development $GIF_SANDBOX/examples/helloworld/.env
+docker run -it --rm -v $GIF_SANDBOX/examples/helloworld:/app gif-truffle bash
+```
+
+Inside the container install npm dependencies, compile the "Hello World" contract and deploy to the local ganache
+
+```bash
+npm install
+truffle compile --all
+truffle migrate --reset
+```
+
+The "Hello World" product contract address may be obtaines from the output of the `truffle migrate` command or the  `HelloWorldInsurance.json` file.
+
+```bash
+grep '"address":' build/contracts/HelloWorldInsurance.json
+```
+
+Which produces an output similar to the one shown below.
+
+```bash
+"address": "0x9eFec315E368e8812025B85b399a69513Cd0e716",
+```
+
+We will need this "Hello World" contract address `0x9eFec315E368e8812025B85b399a69513Cd0e716` to interact with the "Hello World" product contract in the section below.
+
+
+## Interact with the "Hello World" Insurance
+
+Create a brownie container
+
+```bash
+cd $GIF_SANDBOX
+docker run -it --rm -v $PWD/examples/helloworld-client:/projects brownie
+```
+
+```bash
+brownie networks add Ethereum gif-ganache host=http://host.docker.internal:7545 chainid=1234
+brownie compile --all
+brownie run check_helloworld_client --network=gif-ganache
+```
+
+### Random Stuff regarding "Hello World" insurance
+
+official style guides https://docs.soliditylang.org/en/latest/style-guide.html
+in addition: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/GUIDELINES.md
+
 
 ## Run the GIF Monitor
 
@@ -163,26 +233,3 @@ docker logs -f gif-monitor
 After startup open the GIF monitor application in the browser `http://localhost:8081`
 
 
-## Compile and Deploy the "Hello World" Insurance
-
-Create a truffle container
-
-```bash
-cd $GIF_SANDBOX
-cp ./docker/.env.development $GIF_SANDBOX/examples/helloworld/.env
-docker run -it --rm -v $GIF_SANDBOX/examples/helloworld:/app gif-truffle bash
-```
-
-Inside the container install npm dependencies, compile the "Hello World" contract and deploy to the local ganache
-
-
-```bash
-npm install
-truffle compile --all
-truffle migrate --reset
-```
-
-### Random Stuff regarding "Hello World" insurance
-
-official style guides https://docs.soliditylang.org/en/latest/style-guide.html
-in addition: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/GUIDELINES.md
