@@ -3,6 +3,7 @@ pragma solidity 0.7.6;
 
 import "@etherisc/gif-interface/contracts/0.7/Product.sol";
 import "./IHelloWorldInsurance.sol";
+import "./HelloWorldOracle.sol";
 
 
 contract HelloWorldInsurance is IHelloWorldInsurance, Product {
@@ -17,7 +18,7 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
     uint256 public constant PAYOUT_FACTOR_NO_RESPONSE = 1;
     uint256 public constant PAYOUT_FACTOR_KIND_RESPONSE = 0;
 
-    uint16 public constant MAX_LENGTH_GREETING = 20;    
+    uint16 public constant MAX_LENGTH_GREETING = 32;
     string public constant CALLBACK_METHOD_NAME = "greetingCallback";
 
     uint256 public uniqueIndex;
@@ -26,14 +27,6 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
 
     mapping(bytes32 => address) public policyIdToAddress;
     mapping(address => bytes32[]) public addressToPolicyIds;
-
-    // events located in interface
-    // event LogGreetingPolicyCreated(bytes32 policyId);
-    // event LogGreetingRequest(uint256 requestId, bytes32 policyId, bytes32 greeting);
-    // event LogGreetingCallback(uint256 requestId, bytes32 policyId, bytes response);
-
-    // event LogPayoutTransferred(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 amount);
-    // event LogPolicyExpired(bytes32 policyId);
 
     constructor(
         address gifProductService,
@@ -63,45 +56,53 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
         _newApplication(policyId, abi.encode(premium, policyHolder));
         _underwrite(policyId);
 
-        emit LogGreetingPolicyCreated(policyId);
+        emit LogHelloWorldPolicyCreated(policyId);
 
         // Book keeping to simplify lookup
         policyIdToAddress[policyId] = policyHolder;
         addressToPolicyIds[policyHolder].push(policyId);
     }
 
-    function greet(bytes32 policyId, bytes32 greeting) external override {
+    function greet(bytes32 policyId, string calldata greeting) external override {
 
         // Validate input parameters
         require(policyIdToAddress[policyId] == msg.sender, "ERROR:HWI-003:INVALID_POLICY_OR_HOLDER");
-        require(greeting.length <= MAX_LENGTH_GREETING, "ERROR:HWI-004:GREETING_TOO_LONG");
+        require(bytes(greeting).length <= MAX_LENGTH_GREETING, "ERROR:HWI-004:GREETING_TOO_LONG");
+
+        emit LogHelloWorldGreetingReceived(policyId, greeting);
 
         // request response to greeting via oracle call
-        _requestOracleResponse(policyId, greeting);
+        uint256 requestId = _request(
+            policyId,
+            abi.encode(greeting),
+            CALLBACK_METHOD_NAME,
+            greetingsOracleType,
+            greetingsOracleId
+        );
+
+        emit LogHelloWorldGreetingCompleted(requestId, policyId, greeting);
     }
 
     function greetingCallback(uint256 requestId, bytes32 policyId, bytes calldata response)
         external
         onlyOracle
     {
-        emit LogGreetingCallback(requestId, policyId, response);
-
         // get policy data for oracle response
         (uint256 premium, address payable policyHolder) = abi.decode(
             _getApplicationData(policyId), (uint256, address));
 
         // get oracle response data
-        (bytes1 greetingResponseCode) = abi.decode(response, (bytes1));
+        (HelloWorldOracle.AnswerType answer) = abi.decode(response, (HelloWorldOracle.AnswerType));
 
         // claim handling based on reponse to greeting provided by oracle 
-        _handleClaim(policyId, policyHolder, premium, greetingResponseCode);
+        _handleClaim(policyId, policyHolder, premium, answer);
         
         // policy only covers a single greeting/response pair
         // policy can therefore be expired
         _expire(policyId);
 
-        emit LogPolicyExpired(policyId);
-    }
+        emit LogHelloWorldCallbackCompleted(requestId, policyId, response);
+}
 
     function withdraw(uint256 amount) external override onlyOwner {
         require(amount <= address(this).balance);
@@ -118,27 +119,15 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
         return keccak256(abi.encode(senderAddress, productId, uniqueIndex));
     }
 
-    function _requestOracleResponse(bytes32 policyId, bytes32 greeting) internal {
-        uint256 requestId = _request(
-            policyId,
-            abi.encode(greeting),
-            CALLBACK_METHOD_NAME,
-            greetingsOracleType,
-            greetingsOracleId
-        );
-
-        emit LogGreetingRequest(requestId, policyId, greeting);
-    }
-
     function _handleClaim(
         bytes32 policyId, 
         address payable policyHolder, 
         uint256 premium, 
-        bytes1 greetingResponseCode
+        HelloWorldOracle.AnswerType answer
     ) 
         internal 
     {
-        uint256 payoutAmount = _calculatePayoutAmount(premium, greetingResponseCode);
+        uint256 payoutAmount = _calculatePayoutAmount(premium, answer);
 
         // no claims handling for payouts == 0
         if (payoutAmount > 0) {
@@ -150,20 +139,21 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
             // actual transfer of funds for payout of claim
             policyHolder.transfer(payoutAmount);
 
-            emit LogPayoutTransferred(policyId, claimId, payoutId, payoutAmount);
+            emit LogHelloWorldPayoutExecuted(policyId, claimId, payoutId, payoutAmount);
         }
     }
 
-    function _calculatePayoutAmount(uint256 premium, bytes1 greetingResponseCode) 
+    function _calculatePayoutAmount(uint256 premium, HelloWorldOracle.AnswerType answer) 
         internal 
         pure 
         returns(uint256 payoutAmount) 
     {
-        if (greetingResponseCode == "R") { // payout amount for rude response
+        if (answer == HelloWorldOracle.AnswerType.Rude) {
             payoutAmount = PAYOUT_FACTOR_RUDE_RESPONSE * premium;
-        } else if (greetingResponseCode == "N") { // for no response at all
+        } else if (answer == HelloWorldOracle.AnswerType.None) { 
             payoutAmount = PAYOUT_FACTOR_NO_RESPONSE * premium;
-        } else { // for kind response
+        } else { 
+            // for kind response, all is well, no payout
             payoutAmount = 0;
         }
     }

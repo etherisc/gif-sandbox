@@ -146,7 +146,7 @@ From the output shown above you need to look for the contract address shown.
 As a result the registry address in the example above is `0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF`
 
 
-## Deploy the "Hello World" Insurance
+## Deploy the "Hello World" Insurance Product
 
 Ensure that the DEV_GIF_REGISTRY variable in the dotenv file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
 
@@ -192,20 +192,116 @@ We will need this "Hello World" contract address `0x9eFec315E368e8812025B85b399a
 
 ## Interact with the "Hello World" Insurance
 
-Create a brownie container
+For the interaction with the "Hello World" Insurance product the python script `check_helloworld_client.py` is used that relies on the [Brownie](https://eth-brownie.readthedocs.io/en/stable/) framework.
+
+For the procedure below the following files in directory `/examples/helloworld-client` are important.
+
+* Python client script: `./scripts/check_helloworld_client.py`
+* "Hello World" Facade interface: `./interfaces/IHelloWorldFacade.sol`
+* Event definitions:  `./interfaces/IEventFacade.sol`
+
+The solidity files have zero external dependencies and are used by Brownie to create ABI files to interact with the on-chain part of the "Hello World" insurance contract.
+These ABI files are created by the command `brownie compile --all` in sub-folder `./build/interfaces` (see below).
+
+Make sure to adapt the constant `HELLOWORLD_CONTRACT_ADDRESS` in the Python script to the actual address of the deployed "Hello World" product contract.
+
+Create a Brownie container
 
 ```bash
 cd $GIF_SANDBOX
 docker run -it --rm -v $PWD/examples/helloworld-client:/projects brownie
 ```
 
+Make brownie aware of our local gif-ganache chain.
+
 ```bash
 brownie networks add Ethereum gif-ganache host=http://host.docker.internal:7545 chainid=1234
+```
+
+Compile the solidity facade interfaces and run the interaction script file.
+
+```bash
 brownie compile --all
 brownie run check_helloworld_client --network=gif-ganache
 ```
 
-### Random Stuff regarding "Hello World" insurance
+A successful run of the script should the produce output similar to the one shown below.
+
+```bash
+Brownie v1.17.1 - Python development framework for Ethereum
+
+ProjectsProject is the active project.
+
+Running 'scripts/check_helloworld_client.py::main'...
+current network: gif-ganache
+helloworld contract address: 0x774DDa3beEf9650473549Be4EE7054a2ef5B0140
+customer account address: 0xf17f52151EbEF6C7334FAD080c5704D77216b732
+
+creating hello_world policy ...
+Transaction sent: 0x1e0439df6beb0d72d27c99dba1aef9595a955d14c22fd9cac664b362c8567e98
+  Gas price: 20.0 gwei   Gas limit: 590063   Nonce: 315
+  IHelloWorldFacade.applyForPolicy confirmed   Block: 516   Gas used: 521666 (88.41%)
+
+hello_world.applyForPolicy()
+    policyId 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+hello_world.applyForPolicy() tx events
+event[0] LogNewMetadata
+    productId: 12
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    state: 0
+event[1] LogNewApplication
+    productId: 12
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+event[2] LogApplicationStateChanged
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    state: 2
+event[3] LogNewPolicy
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+event[4] LogHelloWorldPolicyCreated
+    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+
+creating greeting claim ...
+Transaction sent: 0xa8efc74d0594b7b76944f740100c44c5d3297526965ca5beb7e72215f23f29ac
+  Gas price: 20.0 gwei   Gas limit: 584315   Nonce: 316
+  IHelloWorldFacade.greet confirmed   Block: 517   Gas used: 493725 (84.50%)
+
+hello_world.greet() tx events
+event[0] LogHelloWorldGreetingReceived
+    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    greeting: hey
+event[1] LogHelloWorldOracleRequestReceived
+    requestId: 91
+    greeting: hey
+event[2] LogPolicyStateChanged
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    state: 1
+event[3] LogHelloWorldCallbackCompleted
+    requestId: 91
+    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    response: 0x0000000000000000000000000000000000000000000000000000000000000000
+event[4] LogOracleResponded
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    requestId: 91
+    responder: 0xE843CDE33060bf9CB11723934EAD6a3DE410DdEE
+    status: True
+event[5] LogHelloWorldOracleResponseHandled
+    requestId: 91
+    answer: 0
+event[6] LogOracleRequested
+    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    requestId: 91
+    responsibleOracleId: 12
+event[7] LogHelloWorldGreetingCompleted
+    requestId: 91
+    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+    greeting: hey
+```
+
+## Random Stuff regarding "Hello World" insurance
+
+TODOs
+
+* make usage of truffle and brownie container more consistent
 
 official style guides https://docs.soliditylang.org/en/latest/style-guide.html
 in addition: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/GUIDELINES.md
