@@ -4,9 +4,6 @@ from brownie import Contract, interface, network, Wei
 from brownie.network import accounts
 from brownie.network.account import Account
 
-from eth_event import get_topic_map, decode_logs
-from web3 import Web3
-
 HELLOWORLD_CONTRACT_ADDRESS = '0x774DDa3beEf9650473549Be4EE7054a2ef5B0140'
 HELLOWORLD_ACCOUNTS_MNEMONIC = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
 
@@ -42,7 +39,6 @@ def main():
 
     hello_world = get_contract_object()
     customer_account = get_account(1)
-    customer2_account = get_account(2)
 
     print('current network: {}'.format(network.show_active()))
     print('helloworld contract address: {}'.format(hello_world.address))
