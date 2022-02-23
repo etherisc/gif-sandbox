@@ -27,7 +27,7 @@ export GIF_SANDBOX_ROOT=$PWD
 
 ## Clone the Repositories
 
-For the sandbox setup you first need to clone the following repositories
+For the sandbox setup you first need to clone the following repositories:
 
 * GIF
 * GIF Sandbox
@@ -63,7 +63,7 @@ export GIF_SANDBOX=$PWD
 
 ## Build Docker Images
 
-Use the commands below to build the ganache and truffle images
+Use the commands below to build the ganache and truffle images.
 
 ```bash
 cd $GIF_SANDBOX
@@ -117,20 +117,21 @@ docker run -it --rm -v $GIF/gif-contracts:/app gif-truffle bash
 In the running truffle container compile and deploy a GIF instance as explained below.
 
 ```bash
+npm install
 gif-tools select-resources
 truffle compile --all
 truffle migrate --reset
 ```
 
 File `resources.yml` is used by `gif-tools select-resources` to populate the folders `contracts` and `migrations` from the files in folders `contracts-available` and `migrations-available`.
-The truffel commands then work with the files in the folders `contracts` and `migrations`
+The truffle commands then work with the files in the folders `contracts` and `migrations`.
 
 `truffle migrate` will update deployment meta data in the `./build/*.json` files of the deployed contracts.
 
 ```bash
 grep '"address":' build/*json
 ```
-Use tha command above to extract the addresses of the deployed GIF contracts.
+Use the command above to extract the addresses of the deployed GIF contracts.
 The output of the grep command should then look similar to the example below.
 
 ```bash
@@ -141,18 +142,18 @@ build/Registry.json: "address": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
 ```
 
 From the output shown above you need to look for the contract address shown.
-As a result the registry address in the example above is `0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF`
+As a result the registry address in the example above is `0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF`.
 
 
 ## Deploy the "Hello World" Insurance Product
 
-Ensure that the DEV_GIF_REGISTRY variable in the dotenv file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
+Ensure that the DEV_GIF_REGISTRY variable in the `dotenv` file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
 
 ```bash
 cd $GIF_SANDBOX
 nano ./docker/.env.development 
 ```
-For the example GIF deploy above the relevant line in file should read
+For the example GIF deploy above the relevant line in file should read the following.
 
 ```
 DEV_GIF_REGISTRY="0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF"
@@ -165,7 +166,7 @@ cp ./docker/.env.development $GIF_SANDBOX/examples/helloworld/.env
 docker run -it --rm -v $GIF_SANDBOX/examples/helloworld:/app gif-truffle bash
 ```
 
-Inside the container install npm dependencies, compile the "Hello World" contract and deploy to the local ganache
+Inside the container install npm dependencies, compile the "Hello World" contract and deploy to the local ganache.
 
 ```bash
 npm install
@@ -173,7 +174,7 @@ truffle compile --all
 truffle migrate --reset
 ```
 
-The "Hello World" product contract address may be obtaines from the output of the `truffle migrate` command or the  `HelloWorldInsurance.json` file.
+The "Hello World" product contract address may be obtained from the output of the `truffle migrate` command or the `HelloWorldInsurance.json` file.
 
 ```bash
 grep '"address":' build/contracts/HelloWorldInsurance.json
@@ -185,7 +186,7 @@ Which produces an output similar to the one shown below.
 "address": "0x9eFec315E368e8812025B85b399a69513Cd0e716",
 ```
 
-We will need this "Hello World" contract address `0x9eFec315E368e8812025B85b399a69513Cd0e716` to interact with the "Hello World" product contract in the section below.
+We will need this "Hello World" contract address to interact with the "Hello World" product contract in the section below. Please make sure to note the address.
 
 
 ## Interact with the "Hello World" Insurance
@@ -203,11 +204,17 @@ These ABI files are created by the command `brownie compile --all` in sub-folder
 
 Make sure to adapt the constant `HELLOWORLD_CONTRACT_ADDRESS` in the Python script to the actual address of the deployed "Hello World" product contract.
 
-Create a Brownie container
+```bash
+cd $GIF_SANDBOX
+nano ./examples/helloworld-client/scripts/check_helloworld_client.py
+HELLOWORLD_CONTRACT_ADDRESS = '<your "Hello World" contract address>'
+```
+
+Create a Brownie container.
 
 ```bash
 cd $GIF_SANDBOX
-docker run -it --rm -v $PWD/examples/helloworld-client:/projects brownie
+docker run -it --rm -v $PWD/examples/helloworld-client:/projects gif-brownie
 ```
 
 Inside the brownie container make brownie aware of our local gif-ganache chain.
@@ -223,7 +230,7 @@ brownie compile --all
 brownie run check_helloworld_client --network=gif-ganache
 ```
 
-A successful run of the script should the produce output similar to the one shown below.
+A successful run of the script should produce output similar to the one shown below.
 
 ```bash
 Brownie v1.17.1 - Python development framework for Ethereum
