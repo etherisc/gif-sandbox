@@ -107,25 +107,20 @@ Before compiling and deploying prepare and enter the truffle container as shown 
 ```bash
 cd $GIF_SANDBOX
 cp ./docker/.env.development $GIF/gif-contracts/.env
+cp ./docker/resources.yml.development $GIF/gif-contracts/resources.yml
 docker run -it --rm -v $GIF/gif-contracts:/app gif-truffle bash
 ```
 
-In the running truffle container compile and deploy a GIF instance as shown below.
-File `resources.yml` can be used to configure which contracts should be compiled and deployed.
-
-The `nano` editor may be used to modify the default set of contracts to compile and migration scripts for contract deployment.
-
-```bash
-nano resources.yml
-```
-
-Based on the content of `resources.yml` the command `gif-tools select-resources` is used to populate the folders `contracts` and `migrations` based on the available source files in folders `contracts-available` and `migrations-available`.
+In the running truffle container compile and deploy a GIF instance as explained below.
 
 ```bash
 gif-tools select-resources
 truffle compile --all
 truffle migrate --reset
 ```
+
+File `resources.yml` is used by `gif-tools select-resources` to populate the folders `contracts` and `migrations` from the files in folders `contracts-available` and `migrations-available`.
+The truffel commands then work with the files in the folders `contracts` and `migrations`
 
 `truffle migrate` will update deployment meta data in the `./build/*.json` files of the deployed contracts.
 
