@@ -8,6 +8,9 @@ This readme is based on the following assumption
 * You are familiar with git
 * Your installation includes bash, Docker and git
 
+:warning: The shell commands below are written for a bash shell.
+If you are working on a Windows box you may use WSL2, Git Bash on Windows or similar. 
+
 ## Preparations
 
 Before you start to clone any repositories decide on a parent directory where you want to store the various repositories that are needed for the sandbox environment.
@@ -27,8 +30,8 @@ export GIF_SANDBOX_ROOT=$PWD
 For the sandbox setup you first need to clone the following repositories
 
 * GIF
-* GIF Monitor
 * GIF Sandbox
+<!-- * GIF Monitor -->
 
 
 ### Clone the GIF Repository
@@ -40,14 +43,14 @@ cd GIF
 export GIF=$PWD
 ```
 
-### Clone the GIF Monitor Repository
+<!-- ### Clone the GIF Monitor Repository
 
 ```bash
 cd $GIF_SANDBOX_ROOT
 git clone https://github.com/etherisc/gif-monitor.git
 cd gif-monitor
 export GIF_MONITOR=$PWD
-```
+``` -->
 
 ### Clone the GIF Sandbox Repository
 
@@ -69,14 +72,14 @@ docker build ./docker/images/truffle -t gif-truffle
 docker build ./docker/images/brownie -t gif-brownie
 ```
 
-And the following commands to build the GIF monitor
+<!-- And the following commands to build the GIF monitor
 
 ```bash
 cd $GIF_MONITOR
 cp $GIF_SANDBOX/docker/.env.development ./.env
 cp $GIF_SANDBOX/docker/images/meteor/Dockerfile .
 docker build . -t gif-monitor
-```
+``` -->
 
 ## Run Ganache
 
@@ -207,7 +210,7 @@ cd $GIF_SANDBOX
 docker run -it --rm -v $PWD/examples/helloworld-client:/projects brownie
 ```
 
-Make brownie aware of our local gif-ganache chain.
+Inside the brownie container make brownie aware of our local gif-ganache chain.
 
 ```bash
 brownie networks add Ethereum gif-ganache host=http://host.docker.internal:7545 chainid=1234
@@ -292,7 +295,7 @@ event[7] LogHelloWorldGreetingCompleted
     greeting: hey
 ```
 
-## Random Stuff regarding "Hello World" insurance
+<!-- ## Random Stuff regarding "Hello World" insurance
 
 TODOs
 
@@ -322,5 +325,5 @@ docker logs -f gif-monitor
 ```
 
 After startup open the GIF monitor application in the browser `http://localhost:8081`
-
+ -->
 
