@@ -8,7 +8,7 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh && \
 # install additional packages
 RUN apt-get update && apt-get install -y \
     git \
-    make \
+    build-essential \
     curl \
     iputils-ping \
     tree \

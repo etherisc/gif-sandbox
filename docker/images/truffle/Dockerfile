@@ -35,7 +35,7 @@ RUN /bin/bash -l -c "npm install -g ethers"
 RUN /bin/bash -l -c "npm install -g web3"
 
 # truffle install
-RUN /bin/bash -l -c "npm install -g truffle"
+RUN /bin/bash -l -c "npm install -g truffle@5.2"
 
 # gif specifics
 RUN /bin/bash -l -c "npm install -g @etherisc/gif-tools"
