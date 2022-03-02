@@ -187,6 +187,22 @@ Which produces an output similar to the one shown below.
 
 We will need this "Hello World" contract address `0x9eFec315E368e8812025B85b399a69513Cd0e716` to interact with the "Hello World" product contract in the section below.
 
+### Brownie Setup - Use `gif-interface` Repository
+
+Switch to branch `feature-test-gif-interface` and start brownie container
+
+```bash
+cd $GIF_SANDBOX
+git checkout feature-test-gif-interface
+docker run -it --rm -v $PWD/examples/helloworld:/projects brownie
+```
+
+Inside the Brownie container
+
+```bash
+brownie compile
+```
+
 
 ## Interact with the "Hello World" Insurance
 

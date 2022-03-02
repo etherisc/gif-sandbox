@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.7.6;
+pragma solidity 0.8.12;
 
-import "@etherisc/gif-interface/contracts/0.7/Product.sol";
+import "@gif-interface/contracts/Product.sol";
 import "./IHelloWorldInsurance.sol";
 import "./HelloWorldOracle.sol";
 
@@ -42,7 +42,7 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
 
     function applyForPolicy() external payable override returns (bytes32 policyId) {
 
-        address payable policyHolder = msg.sender;
+        address payable policyHolder = payable(msg.sender);
         uint256 premium = _getValue();
 
         // Create new ID for this policy

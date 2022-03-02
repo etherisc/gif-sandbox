@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity 0.7.6;
+pragma solidity 0.8.12;
 
-import "@etherisc/gif-interface/contracts/0.7/Oracle.sol";
+import "@gif-interface/contracts/Oracle.sol";
 
 
 contract HelloWorldOracle is Oracle {
