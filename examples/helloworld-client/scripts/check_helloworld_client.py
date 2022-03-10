@@ -4,7 +4,7 @@ from brownie import Contract, interface, network, Wei
 from brownie.network import accounts
 from brownie.network.account import Account
 
-HELLOWORLD_CONTRACT_ADDRESS = '0x774DDa3beEf9650473549Be4EE7054a2ef5B0140'
+HELLOWORLD_CONTRACT_ADDRESS = '<your "Hello World" contract address>'
 HELLOWORLD_ACCOUNTS_MNEMONIC = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
 
 def load_event_facade() -> interface.IEventFacade:

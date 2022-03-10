@@ -180,7 +180,7 @@ The "Hello World" product contract address may be obtained from the output of th
 grep '"address":' build/contracts/HelloWorldInsurance.json
 ```
 
-Which produces an output similar to the one shown below.
+Which produces an output similar to the one shown below (your address can differ from what you see below).
 
 ```bash
 "address": "0x9eFec315E368e8812025B85b399a69513Cd0e716",
