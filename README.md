@@ -147,7 +147,7 @@ As a result the registry address in the example above is `0xf25186B5081Ff5cE7348
 
 ## Deploy the "Hello World" Insurance Product
 
-Ensure that the DEV_GIF_REGISTRY variable in the `dotenv` file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
+Ensure that the DEV_GIF_REGISTRY variable in the `.env` file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
 
 ```bash
 cd $GIF_SANDBOX
