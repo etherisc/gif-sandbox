@@ -9,7 +9,7 @@ compiler:
         # https://eth-brownie.readthedocs.io/en/stable/compile.html#compiler-settings
         remappings:
           - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.5.0"
-          - "@gif-interface=matthiaszimmermann/gif-interface@main-alpha"
+          - "@gif-interface=etherisc/gif-interface@1.2.0-staging-b"
     vyper:
         version: null
 
@@ -19,7 +19,7 @@ compiler:
 dependencies:
     # github dependency format: <owner>/<repository>@<release>
     - OpenZeppelin/openzeppelin-contracts@4.5.0
-    - matthiaszimmermann/gif-interface@main-alpha
+    - etherisc/gif-interface@1.2.0-staging-b
 
 # exclude Ownable when calculating test coverage
 # https://eth-brownie.readthedocs.io/en/v1.10.3/config.html#exclude_paths

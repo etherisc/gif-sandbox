@@ -8,7 +8,7 @@ This readme is based on the following assumption
 * You are familiar with git
 * Your installation includes bash, Docker and git
 
-:warning: The shell commands below are written for a bash shell.
+PLEASE NOTE The shell commands below are written for a bash shell.
 If you are working on a Windows box you may use WSL2, Git Bash on Windows or similar. 
 
 ## Preparations
@@ -29,17 +29,17 @@ export GIF_SANDBOX_ROOT=$PWD
 
 For the sandbox setup you first need to clone the following repositories
 
-* GIF
+* GIF Contracts
 * GIF Sandbox
 <!-- * GIF Monitor -->
 
 
-### Clone the GIF Repository
+### Clone the GIF Contracts Repository
 
 ```bash
 cd $GIF_SANDBOX_ROOT
-git clone https://github.com/etherisc/GIF.git
-cd GIF
+git clone https://github.com/etherisc/gif-contracts.git
+cd gif-contracts
 export GIF=$PWD
 ```
 
@@ -58,7 +58,7 @@ export GIF_MONITOR=$PWD
 cd $GIF_SANDBOX_ROOT
 git clone https://github.com/etherisc/gif-sandbox.git
 cd gif-sandbox
-export GIF_SANDBOX=$PWD
+export SANDBOX=$PWD
 ```
 
 ## Build Docker Images
@@ -66,10 +66,8 @@ export GIF_SANDBOX=$PWD
 Use the commands below to build the ganache and truffle images
 
 ```bash
-cd $GIF_SANDBOX
-docker build ./docker/images/ganache -t gif-ganache
-docker build ./docker/images/truffle -t gif-truffle
-docker build ./docker/images/brownie -t gif-brownie
+cd $GIF
+docker build . -t brownie
 ```
 
 <!-- And the following commands to build the GIF monitor
@@ -81,234 +79,235 @@ cp $GIF_SANDBOX/docker/images/meteor/Dockerfile .
 docker build . -t gif-monitor
 ``` -->
 
-## Run Ganache
+
+## Start a Local Ganache Chain
+
+As the brownie image contains an embedded [Ganache](https://trufflesuite.com/ganache/index.html) chain we can also use this image to create Ganache container as shown below.
 
 ```bash
-docker run -p 7545:8545 -d --name ganache gif-ganache
+docker run -d -p 7545:7545 --name ganache brownie ganache-cli \
+    --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
+    --chainId 1234 \
+    --port 7545 \
+    -h "0.0.0.0"
+
 ```
 
+### Ganache Chain Setup Considerations
 Port 7545 is chosen to avoid conflicts with any productive local ethereum client that typically run on port 8545.
 
 The chosen setup deterministically creates addresses (and private keys) via a HD wallet with the mnemonic `"candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"`. For the creation of the individual accounts the HD path `m/44'/60'/0'/0/{account_index}` is used.
 
-### Accounts with 1000 ETH each
+The local Ganache chain comes with 10 initial accounts that are preloaded with 100 ETH each
 
 * accounts[0]: 0x627306090abaB3A6e1400e9345bC60c78a8BEf57
 * accounts[1]: 0xf17f52151EbEF6C7334FAD080c5704D77216b732
 * accounts[2]: 0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef
+* ...
 
-### Private Keys for Accounts
+### Connect Metamask to Ganache Chain
 
-0. 0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3
-1. 0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f
-2. 0x0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1
+A Metamask wallet can be connect to this local Ganache chain by adding a new network via Metamask "Settings", "Networks", "Add Network" and specifying its property values as shown below
 
-## Deploy a GIF Instance
+* Network Name: `ganache` (just about any name will do)
+* New RPC URL: `http://localhost:7545` (port number needs to match with docker/ganache "port" command line paramters above)
+* Chain ID: `1234` (id needs to match with ganache commande line paramter "chainId" above)
+* Currency Symbol: `ETH` (just about any symbol you like)
 
-Before compiling and deploying prepare and enter the truffle container as shown below.
+When the menmonic `"candy ..."` from above is used as wallet seed phrase with Metamask the wallet will display account `0x627306090abaB3A6e1400e9345bC60c78a8BEf57`
 
-```bash
-cd $GIF_SANDBOX
-cp ./docker/.env.development $GIF/gif-contracts/.env
-cp ./docker/resources.yml.development $GIF/gif-contracts/resources.yml
-docker run -it --rm -v $GIF/gif-contracts:/app gif-truffle bash
-```
+## Deploy GIF to Ganache Chain
 
-In the running truffle container compile and deploy a GIF instance as explained below.
+Start an interactive Brownie container
 
 ```bash
-gif-tools select-resources
-truffle compile --all
-truffle migrate --reset
+cd $GIF
+docker run -it --rm -v $PWD:/projects brownie
 ```
 
-File `resources.yml` is used by `gif-tools select-resources` to populate the folders `contracts` and `migrations` from the files in folders `contracts-available` and `migrations-available`.
-The truffel commands then work with the files in the folders `contracts` and `migrations`
-
-`truffle migrate` will update deployment meta data in the `./build/*.json` files of the deployed contracts.
-
-```bash
-grep '"address":' build/*json
-```
-Use tha command above to extract the addresses of the deployed GIF contracts.
-The output of the grep command should then look similar to the example below.
-
-```bash
-...
-build/Query.json: "address": "0xB529f14AA8096f943177c09Ca294Ad66d2E08b1f",
-build/RegistryController.json: "address": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
-build/Registry.json: "address": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
-```
-
-From the output shown above you need to look for the contract address shown.
-As a result the registry address in the example above is `0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF`
-
-
-## Deploy the "Hello World" Insurance Product
-
-Ensure that the DEV_GIF_REGISTRY variable in the dotenv file contains the right GIF registry address of the GIF instance where you want to deploy the "Hello World" insurance product.
-
-```bash
-cd $GIF_SANDBOX
-nano ./docker/.env.development 
-```
-For the example GIF deploy above the relevant line in file should read
-
-```
-DEV_GIF_REGISTRY="0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF"
-```
-
-Now, create a truffle container.
-
-```bash
-cp ./docker/.env.development $GIF_SANDBOX/examples/helloworld/.env
-docker run -it --rm -v $GIF_SANDBOX/examples/helloworld:/app gif-truffle bash
-```
-
-Inside the container install npm dependencies, compile the "Hello World" contract and deploy to the local ganache
-
-```bash
-npm install
-truffle compile --all
-truffle migrate --reset
-```
-
-The "Hello World" product contract address may be obtaines from the output of the `truffle migrate` command or the  `HelloWorldInsurance.json` file.
-
-```bash
-grep '"address":' build/contracts/HelloWorldInsurance.json
-```
-
-Which produces an output similar to the one shown below.
-
-```bash
-"address": "0x9eFec315E368e8812025B85b399a69513Cd0e716",
-```
-
-We will need this "Hello World" contract address `0x9eFec315E368e8812025B85b399a69513Cd0e716` to interact with the "Hello World" product contract in the section below.
-
-### Brownie Setup - Use `gif-interface` Repository
-
-Switch to branch `feature-test-gif-interface` and start brownie container
-
-```bash
-cd $GIF_SANDBOX
-git checkout feature-test-gif-interface
-docker run -it --rm -v $PWD/examples/helloworld:/projects brownie
-```
-
-Inside the Brownie container
-
-```bash
-brownie compile
-```
-
-
-## Interact with the "Hello World" Insurance
-
-For the interaction with the "Hello World" Insurance product the python script `check_helloworld_client.py` is used that relies on the [Brownie](https://eth-brownie.readthedocs.io/en/stable/) framework.
-
-For the procedure below the following files in directory `/examples/helloworld-client` are important.
-
-* Python client script: `./scripts/check_helloworld_client.py`
-* "Hello World" Facade interface: `./interfaces/IHelloWorldFacade.sol`
-* Event definitions:  `./interfaces/IEventFacade.sol`
-
-The solidity files have zero external dependencies and are used by Brownie to create ABI files to interact with the on-chain part of the "Hello World" insurance contract.
-These ABI files are created by the command `brownie compile --all` in sub-folder `./build/interfaces` (see below).
-
-Make sure to adapt the constant `HELLOWORLD_CONTRACT_ADDRESS` in the Python script to the actual address of the deployed "Hello World" product contract.
-
-Create a Brownie container
-
-```bash
-cd $GIF_SANDBOX
-docker run -it --rm -v $PWD/examples/helloworld-client:/projects brownie
-```
-
-Inside the brownie container make brownie aware of our local gif-ganache chain.
-
-```bash
-brownie networks add Ethereum gif-ganache host=http://host.docker.internal:7545 chainid=1234
-```
-
-Compile the solidity facade interfaces and run the interaction script file.
+In the Brownie container compile all the GIF with all its dependencies
 
 ```bash
 brownie compile --all
-brownie run check_helloworld_client --network=gif-ganache
 ```
 
-A successful run of the script should the produce output similar to the one shown below.
+In the Brownie container add the ganache chain to the networks available to Brownie.
+See Brownie [Network Managment](https://eth-brownie.readthedocs.io/en/stable/network-management.html) for details about brownie networks.
 
 ```bash
-Brownie v1.17.1 - Python development framework for Ethereum
+brownie networks add Local ganache host=http://host.docker.internal:7545 chainid=1234
+```
 
-ProjectsProject is the active project.
+Start Brownie console that connects to the ganache chain.
 
-Running 'scripts/check_helloworld_client.py::main'...
-current network: gif-ganache
-helloworld contract address: 0x774DDa3beEf9650473549Be4EE7054a2ef5B0140
-customer account address: 0xf17f52151EbEF6C7334FAD080c5704D77216b732
+```bash
+brownie console --network ganache
+```
 
-creating hello_world policy ...
-Transaction sent: 0x1e0439df6beb0d72d27c99dba1aef9595a955d14c22fd9cac664b362c8567e98
-  Gas price: 20.0 gwei   Gas limit: 590063   Nonce: 315
-  IHelloWorldFacade.applyForPolicy confirmed   Block: 516   Gas used: 521666 (88.41%)
+Brownie recognizes the network and provides access to its accounts. 
+We can use `accounts[0]` as the owner of the GIF instance to be deployed.
+```bash
+print('network {} is_connected {}'.format(network.show_active(), network.is_connected()))
+print('\n'.join(['{} {:.4f} ETH'.format(acc.address, Wei(acc.balance()).to('ether')) for acc in accounts]))
+owner = accounts[0]
+```
 
-hello_world.applyForPolicy()
-    policyId 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-hello_world.applyForPolicy() tx events
-event[0] LogNewMetadata
-    productId: 12
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    state: 0
-event[1] LogNewApplication
-    productId: 12
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-event[2] LogApplicationStateChanged
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    state: 2
-event[3] LogNewPolicy
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-event[4] LogHelloWorldPolicyCreated
-    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
+An owner account may also be directly created from a seed phrase
+```bash
+owner = accounts.from_mnemonic('candy maple cake sugar pudding cream honey rich smooth crumble sweet treat')
+```
 
-creating greeting claim ...
-Transaction sent: 0xa8efc74d0594b7b76944f740100c44c5d3297526965ca5beb7e72215f23f29ac
-  Gas price: 20.0 gwei   Gas limit: 584315   Nonce: 316
-  IHelloWorldFacade.greet confirmed   Block: 517   Gas used: 493725 (84.50%)
+A new GIF Instance can now be deployed in the Brownie console.
+```bash
+from scripts.instance import GifInstance
+instance = GifInstance(owner)
+```
 
-hello_world.greet() tx events
-event[0] LogHelloWorldGreetingReceived
-    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    greeting: hey
-event[1] LogHelloWorldOracleRequestReceived
-    requestId: 91
-    greeting: hey
-event[2] LogPolicyStateChanged
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    state: 1
-event[3] LogHelloWorldCallbackCompleted
-    requestId: 91
-    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    response: 0x0000000000000000000000000000000000000000000000000000000000000000
-event[4] LogOracleResponded
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    requestId: 91
-    responder: 0xE843CDE33060bf9CB11723934EAD6a3DE410DdEE
-    status: True
-event[5] LogHelloWorldOracleResponseHandled
-    requestId: 91
-    answer: 0
-event[6] LogOracleRequested
-    bpKey: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    requestId: 91
-    responsibleOracleId: 12
-event[7] LogHelloWorldGreetingCompleted
-    requestId: 91
-    policyId: 0x68a6e215fe86df103ce4f26d1e13c2f1626e68a7b76e3d747083a830d4498841
-    greeting: hey
+Use the following command to print the registry address of the newly deployed GIF instance.
+```bash
+>>> instance.getRegistry().address
+'0x78f417302dE7D49046688e4E39807e6ADdc47877'
+```
+
+Save/copy this GIF registry address, you will need it to deploy example insurance projects.
+Note that the GIF registry address will likely be different in your case. 
+
+Exit the Brownie console and container (the 2nd exit)
+
+```bash
+>>> exit()
+exit
+```
+
+## Deploy the "Hello World" Insurance Product
+
+Change to your sandbox directory and start a Brownie container
+
+```bash
+cd $SANDBOX
+docker run -it --rm -v $PWD:/projects brownie
+```
+
+Inside the Brownie container compile all example insurance product contracts and dependencies
+
+```bash
+brownie compile --all
+```
+
+Add the local ganache chain with the deployed GIF instance to Brownie and start a console attached to this chain.
+
+```bash
+brownie networks add Local ganache host=http://host.docker.internal:7545 chainid=1234
+brownie console --network ganache
+```
+
+Inside the Brownie console create the setup below.
+
+```bash
+from scripts.util import getInstanceOperatorService
+from scripts.util import getOracleOwnerService
+from scripts.util import s2b32
+
+owner = accounts[0]
+oracleOwner = accounts[1]
+productOwner = accounts[2]
+
+registryAddress = '0x78f417302dE7D49046688e4E39807e6ADdc47877'
+```
+IMPORTANT: Before you continue, make sure to change the value of the variable registryAddress to the GIF registry address that corresponds to your GIF instance.
+
+```bash
+helper = InstanceHelper.deploy(registryAddress, {'from': owner})
+ios = getInstanceOperatorService(helper)
+oos = getOracleOwnerService(helper)
+```
+
+With the oracle owner service `oss` you can now propose new oracle type and approve it using the instance operator service `ios`
+
+```bash
+oracleTypeNameB32 = s2b32('HelloWorld.OracleType.{}'.format(helper.oracleTypes()))
+
+oos.proposeOracleType(
+    oracleTypeNameB32, 
+    '(bytes input)', 
+    '(bytes1 greetingResponseCode)', 
+    {'from': oracleOwner})
+
+ios.approveOracleType(oracleTypeNameB32, {'from': owner})
+```
+
+The next step is to deploy a new oracle contract.
+After creation the instance operator service is used to approve the new oracle and assign it to the oracle type created in the previous step. 
+
+```bash
+oracleNameB32 = s2b32('HelloWorld.Oracle.{}'.format(helper.oracles()))
+
+oracle = HelloWorldOracle.deploy(
+    helper.getOracleService(),
+    helper.getOracleOwnerService(),
+    oracleTypeNameB32,
+    oracleNameB32,
+    {'from': oracleOwner})
+
+ios.approveOracle(oracle.getId(), {'from': owner})
+ios.assignOracleToOracleType(oracleTypeNameB32, oracle.getId(), {'from': owner})
+```
+
+The final step is to deploy the insurance product contract and its approval by the instance operator service.
+
+```bash
+productNameB32 = s2b32('HelloWorld.Product.{}'.format(helper.products()))
+
+product = HelloWorldInsurance.deploy(
+    helper.getProductService(),
+    productNameB32,
+    oracleTypeNameB32,
+    oracle.getId(),
+    {'from': productOwner})
+
+ios.approveProduct(product.getId(), {'from': owner})
+```
+
+The object `product` can now be used to interact with the "Hello World" insurance product.
+
+As the product contract is now deployed on the local Ganache chain the address `product.address` of the product contract is all we need to start creating policies and making claims.
+
+```bash
+>>> product.address
+'0x86BA3Fd3151E769311b295AFc81D80329616194f'
+```
+
+## Interact with the "Hello World" Product
+
+To interact with the deployed "Hello World" product we can remain in the Brownie console and use the `product` object.
+Alternatively, we can create a new product object that points to the same product contract address as shown below.
+
+```bash
+from scripts.util import getHelloWorldProduct
+
+customer = accounts[3]
+helloWorld = getHelloWorldProduct('0x86BA3Fd3151E769311b295AFc81D80329616194f')
+```
+
+The creation of a policy with the payment of the corresponding insurance premium is shown below.
+
+```bash
+premium = Wei("1.0 ether")
+
+policyTx = helloWorld.applyForPolicy({'from':customer, 'amount':premium})
+policyId = policyTx.return_value
+```
+
+The policyId can be used to make a claim.
+
+The "Hello World" product insures a friendly reply to a greeting of the insured.
+Missing or rude replies are considered loss events by the "Hello World" and result in a payout.
+
+```bash
+greeting = 'hey'
+
+greetingTx = helloWorld.greet(policyId, greeting, {'from': customer})
+greetingTx.info()
 ```
 
 <!-- ## Random Stuff regarding "Hello World" insurance
