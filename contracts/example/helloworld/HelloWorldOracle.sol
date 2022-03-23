@@ -47,24 +47,20 @@ contract HelloWorldOracle is Oracle {
     // this is just a toy example
     // real oracle implementations will get the output from some 
     // off chain component providing the outcome of the business logic
-    function _oracleBusinessLogic(string memory /* greeting */) 
+    function _oracleBusinessLogic(string memory greeting) 
         internal
+        pure
         returns (AnswerType answer)
     {
-        uint256 reminder = _requestCounter % 6;
+        bytes memory bGreeting = bytes(greeting);
 
-        if (reminder <= 2) {
-            // 50% get a kind response to greeting
-            answer = AnswerType.Kind;
-        } else if (reminder <= 4) {
-            // 33.3% get no resonse
+        if (bGreeting.length == 0) {
             answer = AnswerType.None;
+        } else if (bGreeting[0] == bytes1('h')) {
+            answer = AnswerType.Kind;
         } else {
-            // 16.6% get a rude response
             answer = AnswerType.Rude;
         }
-
-        _requestCounter += 1;
     }
 
     function getAnswerCodeKind() public pure returns (bytes1 code) { return RESPONSE_CODE_KIND; }

@@ -11,7 +11,7 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
     bytes32 public constant VERSION = "0.0.1";
     bytes32 public constant POLICY_FLOW = "PolicyFlowDefault";
 
-    uint256 public constant MIN_PREMIUM = 100 * 10**16;
+    uint256 public constant MIN_PREMIUM = 10 * 10**16;
     uint256 public constant MAX_PREMIUM = 1500 * 10**16;
 
     uint256 public constant PAYOUT_FACTOR_RUDE_RESPONSE = 3;

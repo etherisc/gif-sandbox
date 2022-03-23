@@ -14,7 +14,8 @@ class HelloWorld(Product):
         self, 
         oracleOwner: Account,
         productOwner: Account,
-        instance: Instance
+        instance: Instance,
+        publishSource: bool = False
     ):
         super().__init__(
             'HelloWorld', 
@@ -24,4 +25,5 @@ class HelloWorld(Product):
             '(bytes1 greetingResponseCode)', 
             HelloWorldOracle,
             oracleOwner,
-            instance)
+            instance,
+            publishSource)

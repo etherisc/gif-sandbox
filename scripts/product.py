@@ -52,7 +52,8 @@ class GifOracle(GifProductComponent):
         oracleClass, 
         oracleType: GifOracleType,
         owner: Account,
-        instance: Instance
+        instance: Instance,
+        publishSource: bool = False
     ):
         super().__init__(
             '{}.Oracle.{}'.format(
@@ -66,7 +67,8 @@ class GifOracle(GifProductComponent):
             instance.contract.getOracleOwnerService(),
             oracleType.nameB32,
             self.nameB32,
-            {'from': owner})
+            {'from': owner},
+            publish_source = publishSource)
 
         instance.ios.approveOracle(
             self.id, 
@@ -95,7 +97,8 @@ class GifProduct(GifProductComponent):
         oracleType: GifOracleType,
         oracle: GifOracle,
         owner: Account,
-        instance: Instance 
+        instance: Instance,
+        publishSource: bool = False
     ):
         super().__init__(
             '{}.Product.{}'.format(
@@ -109,7 +112,8 @@ class GifProduct(GifProductComponent):
             self.nameB32,
             oracleType.nameB32,
             oracle.id,
-            {'from': owner})
+            {'from': owner},
+            publish_source=publishSource)
 
         instance.ios.approveProduct(
             self.id, 
@@ -135,7 +139,8 @@ class Product(object):
         oracleOutput: str,
         oracleClass,
         oracleOwner: Account,
-        instance: Instance
+        instance: Instance,
+        publishSource: bool = False
     ):
         self.oracleType = GifOracleType(
             productName, 
@@ -149,7 +154,8 @@ class Product(object):
             oracleClass,
             self.oracleType,
             oracleOwner,
-            instance)
+            instance, 
+            publishSource)
         
         self.product = GifProduct(
             productName, 
@@ -157,7 +163,8 @@ class Product(object):
             self.oracleType, 
             self.oracle, 
             productOwner, 
-            instance)
+            instance,
+            publishSource)
 
     @property
     def id(self):

@@ -180,25 +180,35 @@ The creation of a new "Hello World" policy is shown below.
 In the provided example a new policy is created for the `customer` account by calling smart contract method `applyForPolicy` and transferring 1.0 ETH as premium amount.
 
 ```bash
+contract = helloWorld.contract
+Wei(contract.balance()).to('ether')
+
 customer = accounts[3]
 premium = Wei("1.0 ether")
-contract = helloWorld.contract
+tx = contract.applyForPolicy({'from':customer, 'amount':premium})
+Wei(contract.balance()).to('ether')
 
-policyTx = contract.applyForPolicy({'from':customer, 'amount':premium})
-policyId = policyTx.return_value
+id = tx.return_value
 ```
 
-The `policyId` is obtaines from the transaction return value and can be used to make a claim for the newly created policy.
+The policy `id` is obtaines from the transaction return value and can be used to make a claim for the newly created policy.
 
 The "Hello World" product insures a friendly reply to a greeting of the insured.
 Missing or rude replies are considered loss events by the "Hello World" and result in a payout.
 
-```bash
-greeting = 'hey'
+Let's start with `hello` as a greeting.
 
-greetingTx = contract.greet(policyId, greeting, {'from': customer})
-greetingTx.info()
+```bash
+tx = contract.greet(policyId, 'hello', {'from': customer})
+Wei(contract.balance()).to('ether')
+tx.info()
 ```
+
+The HelloWorld oracle provides the outcome of a friendly reply (in fact any greeting starting with an 'h' will lead to a friendly reply with our oracle).
+This is why the contract balance remains the same and we do not get a payout.
+
+Single payouts (payout = premium) can be forced by empty greetings '' and triple payouts by greetings that start with a letter other than 'h'.
+Please note that triple payouts imply that the helloworld contract does have sufficient funding for such a payout.
 
 <!-- ## Random Stuff regarding "Hello World" insurance
 
