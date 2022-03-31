@@ -1,0 +1,45 @@
+// SPDX-License-Identifier: Apache-2.0
+pragma solidity ^0.8.0;
+
+import "@gif-interface/contracts/Oracle.sol";
+
+
+contract FireOracle is Oracle {
+
+    event LogFireOracleRequest(uint256 requestId, string objectName);
+
+    constructor(
+        address gifOracleService,
+        address gifOracleOwnerService,
+        bytes32 oracleTypeName,
+        bytes32 oracleName
+    )
+        Oracle(gifOracleService, gifOracleOwnerService, oracleTypeName, oracleName)
+    { }
+
+    function request(uint256 requestId, bytes calldata input) 
+        external 
+        override 
+        onlyQuery
+    {
+        // decode oracle input data
+        (string memory objectName) = abi.decode(input, (string));
+        emit LogFireOracleRequest(requestId, objectName);
+    }
+
+    function respond(uint256 requestId, bytes1 fireCategory) 
+        external
+    {
+        // input validation
+        require(
+            (fireCategory == 'S') || 
+            (fireCategory == 'M') || 
+            (fireCategory == 'L'), 
+            "fire category not in (S,M,L)");
+
+        // encode oracle output (response) data and
+        // trigger inherited response handling
+        bytes memory output = abi.encode(fireCategory);
+        _respond(requestId, output);
+    }
+}

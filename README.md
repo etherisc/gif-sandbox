@@ -172,6 +172,47 @@ instance = Instance(registryAddress, owner)
 helloWorld = HelloWorld(oracleOwner, productOwner, instance)
 ```
 
+
+And to deploy the "Fire" Insurance
+```bash
+from scripts.instance import Instance
+from scripts.fire import Fire
+
+owner = accounts[0]
+oracleOwner = accounts[1]
+productOwner = accounts[2]
+customer = accounts[3]
+
+registryAddress = '0xbbE595Df857805ab3734f15BE990f9A30CBB89F3'
+
+instance = Instance(registryAddress, owner)
+fire = Fire(oracleOwner, productOwner, instance)
+```
+
+Before any policy applications can be made you need to fund the "Fire" insurance product
+```bash
+risk_capital=1000000
+fire.contract.deposit({'from':productOwner, 'amount':risk_capital})
+
+premium=1000
+tx = fire.contract.applyForPolicy('dog-house', {'from':customer, 'amount':premium})
+tx.info()
+
+small = bytes('S', 'ascii')[0]
+medium = bytes('M', 'ascii')[0]
+large = bytes('L', 'ascii')[0]
+
+fire.contract.balance()
+
+oracle_tx = fire.oracle.contract.respond(0, medium, {'from':oracleOwner})
+
+fire.contract.balance()
+oracle_tx.info()
+
+tx_expire = fire.contract.expirePolicy(0xde16105e9976d153f6a79e2afa46c3df2a333d1e33493145ebdf4c388cd8fc59)
+```
+
+
 ## Interact with the "Hello World" Product
 
 To interact with the deployed "Hello World" product we can remain in the Brownie console and use the `helloWorld` object.
