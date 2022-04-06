@@ -1,8 +1,6 @@
-import logging
-
 from typing import List
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException
 from fastapi.openapi.utils import get_openapi
 
 from server.category import FireCategory
@@ -14,12 +12,12 @@ from server.node import Node
 app = FastAPI()
 node = Node()
 
-@app.get('/requests', response_model=List[Request], tags=['Oracle Request'])
+@app.get('/requests', response_model=List[Request], tags=['Oracle'])
 def get_oracle_requests():
     global node
     return node.requests
 
-@app.get('/requests/{request_id}', response_model=Request, tags=['Oracle Request'])
+@app.get('/requests/{request_id}', response_model=Request, tags=['Oracle'])
 def get_oracle_request(request_id:int):
     try:
         global node
@@ -27,7 +25,7 @@ def get_oracle_request(request_id:int):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.put('/requests/{request_id}/respond', tags=['Oracle Request'])
+@app.put('/requests/{request_id}/respond', tags=['Oracle'])
 def respond_to_oracle_request(request_id:int, fire_category:FireCategory):
     try:
         global node
@@ -40,11 +38,13 @@ def get_fire_policies():
     global node
     return node.policies
 
-@app.post('/policies', response_model=Policy, tags=['Policy'])
-def apply_for_fire_policy(objectName: str, premium:int):
+@app.post('/policies', response_model=str, tags=['Policy'])
+def apply_for_fire_policy(object_name: str, premium:int, response:Response):
     try:
         global node
-        return node.applyForPolicy(objectName, premium)
+        policyId = node.applyForPolicy(object_name, premium)
+        response.status_code = status.HTTP_201_CREATED
+        return policyId
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -78,7 +78,7 @@ def set_node_config(config: PostConfig):
 def custom_openapi():
     global node
     openapi_schema = get_openapi(
-        title = 'Fire Insurane API',
+        title = 'Fire Insurance API',
         version = '0.1.0',
         description = node.info(),
         routes = app.routes)

@@ -8,7 +8,7 @@ from server.config import Config, PostConfig
 from server.fire import Fire
 from server.policy import Policy
 from server.product import GifInstance
-from server.request import Request
+from server.request import Request, Response
 from server.watcher import FireOracleWatcher
 
 class Node(object):
@@ -111,8 +111,9 @@ class Node(object):
             fireCategory,
             self._oracleOwner)
 
-        self._requests[requestId].fire_category = fireCategory
-        self._requests[requestId].open = False
+        self._requests[requestId].response = Response(
+            fire_category = fireCategory,
+            open = False)
     
     @property
     def policies(self) -> List[Policy]:
@@ -124,7 +125,7 @@ class Node(object):
         
         return self._policies[policyId]
 
-    def applyForPolicy(self, objectName:str, premium:int) -> Policy:
+    def applyForPolicy(self, objectName:str, premium:int) -> str:
         (policyId, requestId) = self._fire.applyForPolicy(
             objectName, 
             premium, 
@@ -135,12 +136,13 @@ class Node(object):
             object_name = objectName,
             request_id = requestId,
             premium = premium,
-            sum_insured = 100 * premium)
+            sum_insured = 100 * premium,
+            expired = False)
         
         logging.info('policy {}'.format(policy))
         self._policies[policy.id] = policy
 
-        return policy
+        return policy.id
 
     def expirePolicy(self, policyId:str):
         if policyId not in self._policies:
@@ -149,3 +151,5 @@ class Node(object):
         self._fire.expirePolicy(
             policyId, 
             self._customer)
+        
+        self._policies[policyId].expired = True

@@ -7,3 +7,4 @@ class Policy(BaseModel):
     request_id:int = None
     premium:int = None
     sum_insured:int = None
+    expired:bool = None
