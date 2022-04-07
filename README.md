@@ -20,13 +20,13 @@ This readme is based on the following assumption
 * You are familiar with git
 * Your installation includes bash, Docker and git
 
-PLEASE NOTE The shell commands below are written for a bash shell.
+PLEASE NOTE: The shell commands below are written for a bash shell.
 If you are working on a Windows box you may use WSL2, Git Bash on Windows or similar. 
 
 Before you start to clone any repositories decide on a parent directory where you want to store the various repositories that are needed for the sandbox environment.
 
 In the example below this parent directory is called sandbox-root. 
-For the steps further below we only rely on the existence of the environment variable `GIF_SANDBOX_ROOT`
+For the steps further below we only rely on the existence of the environment variable `GIF_SANDBOX_ROOT`.
 The actual name of the sandbox root directory does not matter.
 
 ```bash
@@ -57,7 +57,7 @@ cd gif-sandbox
 export SANDBOX=$PWD
 ```
 
-The next step is to build the Brownie docker image in the  directory of the GIF sandbox repository
+The next step is to build the Brownie docker image in the directory of the GIF sandbox repository.
 
 ```bash
 docker build . -t brownie
@@ -65,7 +65,7 @@ docker build . -t brownie
 
 ## Start a Local Ganache Chain
 
-As the brownie image contains an embedded [Ganache](https://trufflesuite.com/ganache/index.html) chain we can also use this image to create Ganache container as shown below.
+As the brownie image contains an embedded [Ganache](https://trufflesuite.com/ganache/index.html) chain we can also use this image to create a Ganache container as shown below.
 
 ```bash
 docker run -d -p 7545:7545 --name ganache brownie ganache-cli \
@@ -84,14 +84,14 @@ As network parameter use `http://localhost:7545` as RPC URL and `1234` as Chain 
 
 ## Deploy GIF to Ganache
 
-Start an interactive Brownie container
+Start an interactive Brownie container.
 
 ```bash
 cd $GIF
 docker run -it --rm -v $PWD:/projects brownie
 ```
 
-In the Brownie container compile all the GIF with all its dependencies
+In the Brownie container compile all the GIF with all its dependencies.
 
 ```bash
 brownie compile --all
@@ -116,17 +116,18 @@ Use the following command to print the registry address of your newly deployed G
 instance.getRegistry().address
 ```
 
-PLEASE NOTE save/copy this GIF registry address, you will need it to deploy example insurance projects.
+PLEASE NOTE: Save this GIF registry address for later, you will need it to deploy example insurance projects.
 
 ## The "Fire Insurance" API Server
 
-Open a new shell and change to your sandbox directory and start a Brownie container
+Open a new shell and change to your sandbox directory and start a Brownie container.
 
 ```bash
+cd <your path>/sandbox-root/gif-sandbox
 docker run -p 8000:8000 -it --rm -v $PWD:/projects brownie
 ```
 
-In the Brownie container compile the example contracts and add 'ganache' to the networks managed by Brownie.
+In the Brownie container compile the example contracts and add ganache to the networks managed by Brownie.
 
 ```bash
 brownie compile --all
@@ -140,7 +141,7 @@ uvicorn server.api:app --log-level info --host 0.0.0.0 --reload
 ```
 
 After the application startup has completed open the OpenAPI UI in your web browser
-[http://localhost:8000/docs](http://localhost:8000/docs)
+[http://localhost:8000/docs](http://localhost:8000/docs).
 
 ### Deploy the "Fire Insurance" Product
 Switch to the [POST Config endpoint](http://localhost:8000/docs#/Config/set_node_config_config_post) of the API server
@@ -153,7 +154,16 @@ Clicking on **Execute** in the UI will trigger the deployment of the "Fire Insur
   "mnemonic": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
 }
 ```
-After a successful deploy the product and oracle addresses of the fire insurance are shown in the response body field.
+After a successful deploy the product and oracle addresses of the fire insurance are shown in the response body field. PLEASE NOTE: You should save the product address for later.
+
+```json
+{
+  "product_address": "0x2E2D10b41b7c8DDb995568A87185428d9A513ead",
+  "oracle_address": "0x4D2D24899c0B115a1fce8637FCa610Fe02f1909e",
+  "mnemonic": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
+  ...
+}
+```
 
 Before creating any policies check the balances of the product contract and the customer account in the shell you used to deploy the GIF instance.
 
@@ -172,7 +182,7 @@ Enter the name of the object to be insured and provide some policy amount.
 To create the policy with these values click on **Execute**.
 You can now check the updated balances of the customer account (which should now have decreased by 1000 wei) and the product address (which should have increased by the same amount).
 
-A successful policy creation also triggers a corresponding oracle request that is shown at the [GET Requests](http://localhost:8000/docs#/Oracle%20Request/get_oracle_requests_requests_get) endpoint.
+A successful policy creation also triggers a corresponding oracle request that is shown at the [GET Requests](http://localhost:8000/docs#/Oracle/get_oracle_requests_requests_get) endpoint.
 An example output is shown below.
 
 ```json
@@ -196,14 +206,19 @@ The API server obtained this information from a corresponding log event that has
 ### Trigger a "Fire" Claim
 Let us assume that we observe a medium sized fire for the object of the policy you just created.
 
-Use the [PUT Request](http://localhost:8000/docs#/Oracle%20Request/respond_to_oracle_request_requests__request_id__respond_put) endpoint to trigger a response to the oracle request.
+Use the [PUT Request](http://localhost:8000/docs#/Oracle/respond_to_oracle_request_requests__request_id__respond_put) endpoint to trigger a response to the oracle request.
 Enter the request ID and the category of the fire observed.
 
-* For `request_id` enter `<requestId corresponding to your poilicy>`
+* For `request_id` enter `<requestId corresponding to your policy>`
 * For `fire_category` enter `M`
 
-Send this response to the "Fire Oracle" by clicking on **Execute**.
-You can now verify the updated balances of the fire contract and the customer account.
+Send this request to the "Fire Oracle" by clicking on **Execute**.
+You can now verify the updated balances of the fire contract and the customer account in the shell you used to deploy the GIF instance.
+
+```bash
+Wei(web3.eth.getBalance('<your product contract address>')).to('wei')
+Wei(accounts[3].balance()).to('wei')
+```
 
 To get a more detailed insight into the inner working of the product contract check the information available from the Ganache chain.
 In the Brownie console that you used to deploy the GIF instance using `tx.info()` as shown below.
