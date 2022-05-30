@@ -21,8 +21,6 @@ class HelloWorld(Product):
             'HelloWorld', 
             HelloWorldInsurance, 
             productOwner, 
-            '(bytes input)', 
-            '(bytes1 greetingResponseCode)', 
             HelloWorldOracle,
             oracleOwner,
             instance,

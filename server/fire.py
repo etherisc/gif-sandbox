@@ -30,8 +30,6 @@ class Fire(Product):
             'Fire', 
             FireInsurance, 
             productOwner, 
-            '(bytes input)', 
-            '(bytes1 fireCategory)', 
             FireOracle,
             oracleOwner,
             instance,

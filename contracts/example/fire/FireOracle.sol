@@ -11,10 +11,9 @@ contract FireOracle is Oracle {
     constructor(
         address gifOracleService,
         address gifOracleOwnerService,
-        bytes32 oracleTypeName,
         bytes32 oracleName
     )
-        Oracle(gifOracleService, gifOracleOwnerService, oracleTypeName, oracleName)
+        Oracle(gifOracleService, gifOracleOwnerService, oracleName)
     { }
 
     function request(uint256 requestId, bytes calldata input) 

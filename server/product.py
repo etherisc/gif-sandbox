@@ -41,41 +41,12 @@ class GifProductComponent(object):
         return s2b32(self.name)
 
 
-class GifOracleType(GifProductComponent):
-
-    def __init__(
-        self, 
-        productName:str, 
-        inputType:str, 
-        outputType:str, 
-        owner: Account,
-        instance: GifInstance, 
-    ):
-        super().__init__(
-            '{}.OracleType.{}'.format(
-                productName, 
-                instance.ios.oracleTypes()),
-            owner,
-            instance)
-
-        self.instance.oos.proposeOracleType(
-            self.nameB32, 
-            inputType, 
-            outputType, 
-            {'from': self.owner})
-
-        self.instance.ios.approveOracleType(
-            self.nameB32, 
-            {'from': self.instance.owner})
-
-
 class GifOracle(GifProductComponent):
 
     def __init__(
         self, 
         productName:str, 
         oracleClass, 
-        oracleType: GifOracleType,
         owner: Account,
         instance: GifInstance,
         publishSource: bool = False
@@ -90,17 +61,11 @@ class GifOracle(GifProductComponent):
         self.oracle = oracleClass.deploy(
             instance.getAddress(GifInstance.ORACLE_SERVICE),
             instance.getAddress(GifInstance.ORACLE_OWNER_SERVICE),
-            oracleType.nameB32,
             self.nameB32,
             {'from': owner},
             publish_source = publishSource)
 
         instance.ios.approveOracle(
-            self.id, 
-            {'from': instance.owner})
-        
-        instance.ios.assignOracleToOracleType(
-            oracleType.nameB32, 
             self.id, 
             {'from': instance.owner})
 
@@ -119,7 +84,6 @@ class GifProduct(GifProductComponent):
         self, 
         productName:str, 
         productClass, 
-        oracleType: GifOracleType,
         oracle: GifOracle,
         owner: Account,
         instance: GifInstance,
@@ -135,7 +99,6 @@ class GifProduct(GifProductComponent):
         self.product = productClass.deploy(
             instance.getAddress(GifInstance.PRODUCT_SERVICE),
             self.nameB32,
-            oracleType.nameB32,
             oracle.id,
             {'from': owner},
             publish_source=publishSource)
@@ -160,24 +123,15 @@ class Product(object):
         productName: str,
         productClass,
         productOwner: Account,
-        oracleInput: str,
-        oracleOutput: str,
         oracleClass,
         oracleOwner: Account,
         instance: GifInstance,
         publishSource: bool = False
     ):
-        self.oracleType = GifOracleType(
-            productName, 
-            oracleInput, 
-            oracleOutput, 
-            oracleOwner,
-            instance)
 
         self.oracle = GifOracle(
             productName, 
             oracleClass,
-            self.oracleType,
             oracleOwner,
             instance, 
             publishSource)
@@ -185,7 +139,6 @@ class Product(object):
         self.product = GifProduct(
             productName, 
             productClass, 
-            self.oracleType, 
             self.oracle, 
             productOwner, 
             instance,

@@ -28,7 +28,6 @@ contract InstanceHelper {
         _productService = IProductService(_registry.getContractFromRegistry(PRODUCT_SERVICE));
     }
 
-    function oracleTypes() external view returns (uint256) { return _operatorService.oracleTypes(); }
     function oracles() external view returns (uint256) { return _operatorService.oracles(); }
     function products() external view returns (uint256) { return _operatorService.products(); }
 

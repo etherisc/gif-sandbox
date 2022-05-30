@@ -140,7 +140,12 @@ Start the "Fire Insurance" API sever.
 uvicorn server.api:app --log-level info --host 0.0.0.0 --reload
 ```
 
-After the application startup has completed open the OpenAPI UI in your web browser
+In case the above command leads to error messages like 
+`brownie.exceptions.ContractNotFound: No contract deployed at 0x...` 
+this might caused by brownie book keeping of previous contracts that is probably not relevant in your situation.
+In this case delete the files in directory `build/deployments/*` and try to start the API server again.
+
+After the application startup has completed successfully open the OpenAPI UI in your web browser
 [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ### Deploy the "Fire Insurance" Product

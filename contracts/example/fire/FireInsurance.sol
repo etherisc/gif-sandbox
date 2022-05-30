@@ -17,7 +17,6 @@ contract FireInsurance is Product {
     string public constant CALLBACK_METHOD_NAME = "oracleCallback";
 
     // variables
-    bytes32 public fireOracleType;
     uint256 public fireOracleId;
     uint256 public uniqueIndex;
 
@@ -33,12 +32,10 @@ contract FireInsurance is Product {
     constructor(
         address gifProductService,
         bytes32 productName,
-        bytes32 oracleType,
         uint256 oracleId
     )
         Product(gifProductService, productName, POLICY_FLOW)
     {
-        fireOracleType = oracleType;
         fireOracleId = oracleId;
     }
 
@@ -81,7 +78,6 @@ contract FireInsurance is Product {
             policyId,
             abi.encode(objectName),
             CALLBACK_METHOD_NAME,
-            fireOracleType,
             fireOracleId
         );
 

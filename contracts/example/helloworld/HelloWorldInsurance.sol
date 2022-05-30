@@ -22,7 +22,6 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
     string public constant CALLBACK_METHOD_NAME = "greetingCallback";
 
     uint256 public uniqueIndex;
-    bytes32 public greetingsOracleType;
     uint256 public greetingsOracleId;
 
     mapping(bytes32 => address) public policyIdToAddress;
@@ -31,12 +30,10 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
     constructor(
         address gifProductService,
         bytes32 productName,
-        bytes32 oracleType,
         uint256 oracleId
     )
         Product(gifProductService, productName, POLICY_FLOW)
     {
-        greetingsOracleType = oracleType;
         greetingsOracleId = oracleId;
     }
 
@@ -76,7 +73,6 @@ contract HelloWorldInsurance is IHelloWorldInsurance, Product {
             policyId,
             abi.encode(greeting),
             CALLBACK_METHOD_NAME,
-            greetingsOracleType,
             greetingsOracleId
         );
 

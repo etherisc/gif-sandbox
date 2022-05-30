@@ -63,7 +63,6 @@ contract TestProduct is Product {
             policyId,
             abi.encode(_claims),
             ORACLE_CALLBACK_METHOD_NAME,
-            _testOracleType,
             _testOracleId
         );
     }
