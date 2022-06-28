@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from fastapi import FastAPI, Response, status, HTTPException
@@ -31,6 +32,7 @@ def respond_to_oracle_request(request_id:int, fire_category:FireCategory):
         global node
         node.sendResponse(request_id, fire_category)
     except ValueError as e:
+        logging.error(e)
         raise HTTPException(status_code=404, detail=str(e))
 
 @app.get('/policies', response_model=List[Policy], tags=['Policy'])

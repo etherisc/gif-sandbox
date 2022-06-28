@@ -1,40 +1,56 @@
+import logging
+import uuid
+
+from brownie import network
 from brownie.network.account import Account
 
-from server.util import getContract, s2b32
+# from scripts.instance import Instance
+from server.util import (
+    getContract,
+    s2b32
+)
 
 from brownie.project.Project import (
-    InstanceHelper,
-    interface
+    interface,
 )
 
 class GifInstance(object):
 
-    INSTANCE_OPERATOR_SERVICE = "InstanceOperatorService"
-    ORACLE_OWNER_SERVICE = "OracleOwnerService"
-    ORACLE_SERVICE = "OracleService"
-    PRODUCT_SERVICE = "ProductService"
+    def __init__(self, registryAddress:Account, owner:Account):
+        logging.info('connected to network {}'.format(network.show_active()))        
+        logging.info('setting up instance from registry {}'.format(registryAddress))
 
-    def __init__(self, registryAddress: str, owner: Account):
+        self.registry = getContract(interface.IRegistry, registryAddress)
         self.owner = owner
-        self._reg = getContract(interface.IRegistryAccess, registryAddress)
 
-        iosAddress = self.getAddress(GifInstance.INSTANCE_OPERATOR_SERVICE)
-        oosAddress = self.getAddress(GifInstance.ORACLE_OWNER_SERVICE)
+        isAddress = self.registry.getContract(s2b32('InstanceService'))
+        self.instanceService = getContract(interface.IInstanceService, isAddress)
 
-        self.ios = getContract(interface.IInstanceOperatorService, iosAddress)
-        self.oos = getContract(interface.IOracleOwnerService, oosAddress)
+        logging.info('validating read access: products {}, oracles {}'.format(
+            self.instanceService.products(),
+            self.instanceService.oracles(),
+        ))
 
-    def getAddress(self, contractName:str):
-        nameB32 = s2b32(contractName)
-        return self._reg.getContractFromRegistry(nameB32, {'from': self.owner})
+        iosAddress = self.instanceService.getInstanceOperatorService()
+        cosAddress = self.instanceService.getComponentOwnerService()        
+
+        logging.info('validating services. ios {} cos {}'.format(
+            iosAddress,
+            cosAddress
+        ))
+
+        self.instanceOperatorService = getContract(interface.IInstanceOperatorService, iosAddress)
+        self.componentOwnerService = getContract(interface.IComponentOwnerService, cosAddress)        
 
 
 class GifProductComponent(object):
 
-    def __init__(self, name:str, owner: Account, instance: GifInstance):
+    def __init__(self, name:str, owner:Account, instance:GifInstance):
         self.name = name
         self.owner = owner
         self.instance = instance
+
+        logging.info("setting up component '{}' with owner {}".format(name, owner))
     
     @property
     def nameB32(self):
@@ -48,24 +64,37 @@ class GifOracle(GifProductComponent):
         productName:str, 
         oracleClass, 
         owner: Account,
-        instance: GifInstance,
+        instance:GifInstance,
         publishSource: bool = False
     ):
         super().__init__(
             '{}.Oracle.{}'.format(
                 productName, 
-                instance.ios.oracles()),
+                _uuidNamePart()),
             owner,
             instance)
         
+        providerRole = instance.instanceService.oracleProviderRole()
+        instance.instanceOperatorService.grantRole(
+            providerRole, 
+            owner, 
+            {'from': instance.owner})
+
         self.oracle = oracleClass.deploy(
-            instance.getAddress(GifInstance.ORACLE_SERVICE),
-            instance.getAddress(GifInstance.ORACLE_OWNER_SERVICE),
             self.nameB32,
+            instance.registry,
             {'from': owner},
             publish_source = publishSource)
 
-        instance.ios.approveOracle(
+        instance.componentOwnerService.propose(
+            self.oracle,
+            {'from': owner}
+        )
+
+        logging.info('component self.id {} proposed'.format(
+            self.id))
+
+        instance.instanceOperatorService.approve(
             self.id, 
             {'from': instance.owner})
 
@@ -84,27 +113,38 @@ class GifProduct(GifProductComponent):
         self, 
         productName:str, 
         productClass, 
-        oracle: GifOracle,
-        owner: Account,
-        instance: GifInstance,
+        oracle:GifOracle,
+        owner:Account,
+        instance:GifInstance,
         publishSource: bool = False
     ):
         super().__init__(
             '{}.Product.{}'.format(
                 productName, 
-                instance.ios.products()),
+                _uuidNamePart()),
             owner,
             instance)
-        
+                
+        ownerRole = instance.instanceService.productOwnerRole()
+        instance.instanceOperatorService.grantRole(
+            ownerRole, 
+            owner, 
+            {'from': instance.owner})
+
         self.product = productClass.deploy(
-            instance.getAddress(GifInstance.PRODUCT_SERVICE),
             self.nameB32,
+            instance.registry,
             oracle.id,
             {'from': owner},
             publish_source=publishSource)
 
-        instance.ios.approveProduct(
-            self.id, 
+        instance.componentOwnerService.propose(
+            self.product,
+            {'from': owner}
+        )
+
+        instance.instanceOperatorService.approve(
+            self.id,
             {'from': instance.owner})
 
     @property
@@ -120,13 +160,13 @@ class Product(object):
 
     def __init__(
         self, 
-        productName: str,
+        productName:str,
         productClass,
-        productOwner: Account,
+        productOwner:Account,
         oracleClass,
-        oracleOwner: Account,
-        instance: GifInstance,
-        publishSource: bool = False
+        oracleOwner:Account,
+        instance:GifInstance,
+        publishSource:bool = False
     ):
 
         self.oracle = GifOracle(
@@ -151,3 +191,6 @@ class Product(object):
     @property
     def contract(self):
         return self.product.contract
+
+def _uuidNamePart():
+    return str(uuid.uuid4())[:8]

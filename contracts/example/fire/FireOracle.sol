@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@gif-interface/contracts/Oracle.sol";
-
+import "@gif-interface/contracts/components/Oracle.sol";
 
 contract FireOracle is Oracle {
 
-    event LogFireOracleRequest(uint256 requestId, string objectName);
+    event LogFireOracleRequest(
+        uint256 requestId, 
+        string objectName
+    );
 
     constructor(
-        address gifOracleService,
-        address gifOracleOwnerService,
-        bytes32 oracleName
+        bytes32 oracleName,
+        address registry
     )
-        Oracle(gifOracleService, gifOracleOwnerService, oracleName)
+        Oracle(oracleName, registry)
     { }
 
     function request(uint256 requestId, bytes calldata input) 

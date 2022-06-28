@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@gif-interface/contracts/Product.sol";
 import "./FireOracle.sol";
-
+import "@gif-interface/contracts/components/Product.sol";
 
 contract FireInsurance is Product {
 
@@ -25,20 +24,21 @@ contract FireInsurance is Product {
     // events
     event LogFirePolicyCreated(address policyHolder, string objectName, bytes32 policyId);
     event LogFirePolicyExpired(string objectName, bytes32 policyId);
+    event LogFireOracleCallbackReceived(uint256 requestId, bytes32 policyId, bytes fireCategory);
     event LogFireClaimConfirmed(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
     event LogFirePayoutExecuted(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
 
-    // functions
     constructor(
-        address gifProductService,
         bytes32 productName,
+        address registry,
         uint256 oracleId
     )
-        Product(gifProductService, productName, POLICY_FLOW)
+        Product(productName, POLICY_FLOW, registry)
     {
         fireOracleId = oracleId;
     }
 
+    // functions
     function deposit() public payable {}
     
     function withdraw(uint256 amount) external onlyOwner {
@@ -64,7 +64,7 @@ contract FireInsurance is Product {
 
         // Create new ID for this policy
         uniqueIndex++;
-        policyId = keccak256(abi.encode(productId, policyHolder, objectName, uniqueIndex));
+        policyId = keccak256(abi.encode(getId(), policyHolder, objectName, uniqueIndex));
 
         // Create and underwrite new application
         _newApplication(policyId, abi.encode(policyHolder, objectName, premium));
@@ -103,6 +103,8 @@ contract FireInsurance is Product {
         external
         onlyOracle
     {
+        emit LogFireOracleCallbackReceived(requestId, policyId, response);
+
         // Get policy data for oracle response
         (address payable policyHolder, string memory objectName, uint256 premium) = abi.decode(
             _getApplicationData(policyId), (address, string, uint256));
