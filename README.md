@@ -57,10 +57,12 @@ cd gif-sandbox
 export SANDBOX=$PWD
 ```
 
-The next step is to build the Brownie docker image in the directory of the GIF sandbox repository.
+Build the Brownie docker image.
 
 ```bash
+cd docker
 docker build . -t brownie
+cd $SANDBOX
 ```
 
 ## Start a Local Ganache Chain
