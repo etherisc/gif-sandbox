@@ -6,4 +6,5 @@ CMD ganache-cli \
     --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
     --chainId 1234 \
     --port 7545 \
+    --accounts 20 \
     -h "0.0.0.0"
