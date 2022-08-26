@@ -9,6 +9,8 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 # install mcfly as root
 RUN curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sh -s -- --git cantino/mcfly 
 
+RUN mkdir /gif-contracts && chown vscode /gif-contracts
+
 USER vscode
 
 # Shell customizations

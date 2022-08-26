@@ -14,7 +14,7 @@ compiler:
         version: null
 
 networks:
-    default: gifganache
+    default: ganache
     
 
 # packages below will be added to brownie
