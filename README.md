@@ -12,6 +12,10 @@ The API server provides a simple web UI in the browser.
 The API servers is first used to deploy the "Fire Insurance" product to your local GIF instance.
 The API server can then be used to create fire policies and interact with those fire policies.
 
+The sandbox can be deployed in two ways:
+  - as a Visual Studio Code Devcontainer (mostly automatic setup)
+  - installing GIF and product by hand (mostly manual setup)
+
 ## Prerequisites
 
 This readme is based on the following assumption 
@@ -25,6 +29,16 @@ If you are working on a Windows box you may use WSL2, Git Bash on Windows or sim
 
 Before you start to clone any repositories decide on a parent directory where you want to store the various repositories that are needed for the sandbox environment.
 
+## Devcontainer based setup
+
+The setup for the devcontainer works very similar to the description for our [development environment](https://github.com/etherisc/gif-sandbox/blob/master/docs/development_environment.md). 
+
+The only difference being that you need to clone the [gif-sandbox repository](https://github.com/etherisc/gif-sandbox). From there on follow the description of the development environment in the devconainer. Just be a bit patient with the post-installation script as it will a complete GIF instance it might take some minutes to complete. 
+
+Once the devcontainer has finished starting (the last log message you will see in the log is `Sandbox ready - GIF Registry address in gif_instance_address.txt`) you can get the address of the GIF instance from the file `gif_instance_address.txt`. Also running `brownie console --network=ganache` will give you a brownie console connected to the local Ganach chain that as the GIF instance deployed. Now you can continue below in the section _Deploy the "Fire Insurance" Product_. 
+
+## Manual setup of GIF and product
+
 In the example below this parent directory is called sandbox-root. 
 For the steps further below we only rely on the existence of the environment variable `GIF_SANDBOX_ROOT`.
 The actual name of the sandbox root directory does not matter.
@@ -35,7 +49,7 @@ cd sandbox-root
 export GIF_SANDBOX_ROOT=$PWD
 ```
 
-## Create the Sandbox Setup
+### Create the Sandbox Setup
 
 To create the sandbox setup start by cloning the GIF contracts and GIF sandbox repositories and build the Brownie docker image.
 
@@ -65,7 +79,7 @@ docker build . -t brownie
 cd $SANDBOX
 ```
 
-## Start a Local Ganache Chain
+### Start a Local Ganache Chain
 
 As the brownie image contains an embedded [Ganache](https://trufflesuite.com/ganache/index.html) chain we can also use this image to create a Ganache container as shown below.
 
@@ -84,7 +98,7 @@ Port `7545` is chosen to avoid conflicts with any productive local ethereum clie
 To connect with Metamaks using the mnemonic as secret recovery phrase.
 As network parameter use `http://localhost:7545` as RPC URL and `1234` as Chain ID.
 
-## Deploy GIF to Ganache
+### Deploy GIF to Ganache
 
 Start an interactive Brownie container.
 
@@ -120,7 +134,7 @@ instance.getRegistry().address
 
 PLEASE NOTE: Save this GIF registry address for later, you will need it to deploy example insurance projects.
 
-## The "Fire Insurance" API Server
+### The "Fire Insurance" API Server
 
 Open a new shell and change to your sandbox directory and start a Brownie container.
 
@@ -150,7 +164,8 @@ In this case delete the files in directory `build/deployments/*` and try to star
 After the application startup has completed successfully open the OpenAPI UI in your web browser
 [http://localhost:8000/docs](http://localhost:8000/docs).
 
-### Deploy the "Fire Insurance" Product
+## Deploy the "Fire Insurance" Product
+
 Switch to the [POST Config endpoint](http://localhost:8000/docs#/Config/set_node_config_config_post) of the API server
 Click **Try it out** and provide the GIF registry contract address and the mnemonic to setup the GIF sandbox accounts in the request body field (replace the comment with the registry address from your GIF instance).
 Clicking on **Execute** in the UI will trigger the deployment of the "Fire Insurance" product to the GIF instance.
