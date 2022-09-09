@@ -1,5 +1,7 @@
 FROM node:lts-bullseye
 
+EXPOSE 7545
+
 RUN npm install -g ganache-cli
 
 CMD ganache-cli \
@@ -7,4 +9,5 @@ CMD ganache-cli \
     --chainId 1234 \
     --port 7545 \
     --accounts 20 \
+    --db .ganache \
     -h "0.0.0.0"

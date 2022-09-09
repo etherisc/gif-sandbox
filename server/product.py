@@ -74,7 +74,7 @@ class GifOracle(GifProductComponent):
             owner,
             instance)
         
-        providerRole = instance.instanceService.oracleProviderRole()
+        providerRole = instance.instanceService.getOracleProviderRole()
         instance.instanceOperatorService.grantRole(
             providerRole, 
             owner, 
@@ -106,6 +106,65 @@ class GifOracle(GifProductComponent):
     def contract(self):
         return self.oracle
 
+class GifRiskpool(GifProductComponent):
+
+    def __init__(
+        self, 
+        productName:str, 
+        riskpoolClass, 
+        collateralization: int,
+        token: Account,
+        wallet: Account,
+        owner: Account,
+        instance:GifInstance,
+        publishSource: bool = False
+    ):
+        super().__init__(
+            '{}.Riskpool.{}'.format(
+                productName, 
+                _uuidNamePart()),
+            owner,
+            instance)
+
+        self.collateralization = collateralization
+        self.token = token
+        self.wallet = wallet
+        
+        providerRole = instance.instanceService.getRiskpoolKeeperRole()
+        instance.instanceOperatorService.grantRole(
+            providerRole, 
+            owner, 
+            {'from': instance.owner})
+
+        self.riskpool = riskpoolClass.deploy(
+            self.nameB32,
+            self.collateralization,
+            self.token,
+            self.wallet,
+            instance.registry,
+            {'from': owner},
+            publish_source = publishSource)
+
+        instance.componentOwnerService.propose(
+            self.riskpool,
+            {'from': owner}
+        )
+
+        logging.info('component self.id {} proposed'.format(
+            self.id))
+
+        instance.instanceOperatorService.approve(
+            self.id, 
+            {'from': instance.owner})
+
+    @property
+    def id(self):
+        return self.riskpool.getId()
+
+    @property
+    def contract(self):
+        return self.riskpool
+
 
 class GifProduct(GifProductComponent):
 
@@ -114,6 +173,8 @@ class GifProduct(GifProductComponent):
         productName:str, 
         productClass, 
         oracle:GifOracle,
+        token: Account,
+        riskpoolId,
         owner:Account,
         instance:GifInstance,
         publishSource: bool = False
@@ -125,7 +186,7 @@ class GifProduct(GifProductComponent):
             owner,
             instance)
                 
-        ownerRole = instance.instanceService.productOwnerRole()
+        ownerRole = instance.instanceService.getProductOwnerRole()
         instance.instanceOperatorService.grantRole(
             ownerRole, 
             owner, 
@@ -133,7 +194,9 @@ class GifProduct(GifProductComponent):
 
         self.product = productClass.deploy(
             self.nameB32,
+            token,
             instance.registry,
+            riskpoolId,
             oracle.id,
             {'from': owner},
             publish_source=publishSource)
@@ -165,6 +228,9 @@ class Product(object):
         productOwner:Account,
         oracleClass,
         oracleOwner:Account,
+        riskpoolClass,
+        riskpoolToken: Account,
+        riskpoolWallet: Account,
         instance:GifInstance,
         publishSource:bool = False
     ):
@@ -175,11 +241,23 @@ class Product(object):
             oracleOwner,
             instance, 
             publishSource)
+
+        self.riskpool = GifRiskpool(
+            productName, 
+            riskpoolClass, 
+            instance.instanceService.getFullCollateralizationLevel(),
+            riskpoolToken,
+            riskpoolWallet,
+            oracleOwner,
+            instance, 
+            publishSource)
         
         self.product = GifProduct(
             productName, 
             productClass, 
             self.oracle, 
+            riskpoolToken, 
+            self.riskpool.id,
             productOwner, 
             instance,
             publishSource)

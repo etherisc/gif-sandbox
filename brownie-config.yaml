@@ -9,7 +9,7 @@ compiler:
         # https://eth-brownie.readthedocs.io/en/stable/compile.html#compiler-settings
         remappings:
         - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.0"
-        - "@gif-interface=etherisc/gif-interface@c958220"
+        - "@etherisc/gif-interface=etherisc/gif-interface@c958220"
     vyper:
         version: null
 

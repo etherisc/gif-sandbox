@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
-import "@gif-interface/contracts/components/Oracle.sol";
+import "@etherisc/gif-interface/contracts/components/Oracle.sol";
 
 contract FireOracle is Oracle {
 
@@ -41,5 +41,12 @@ contract FireOracle is Oracle {
         // trigger inherited response handling
         bytes memory output = abi.encode(fireCategory);
         _respond(requestId, output);
+    }
+
+    function cancel(uint256 requestId)
+        external override
+    {
+        // TODO mid/low priority
+        // cancelChainlinkRequest(_requestId, _payment, _callbackFunctionId, _expiration);
     }
 }

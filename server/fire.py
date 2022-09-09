@@ -8,7 +8,7 @@ from brownie import network
 from brownie.network.contract import Contract
 from brownie.network.web3 import web3
 
-from brownie.project.Project import FireInsurance, FireOracle
+from brownie.project.Project import FireInsurance, FireOracle, FireRiskpool
 
 from server.account import Account
 from server.product import GifInstance, Product
@@ -22,6 +22,8 @@ class Fire(Product):
         self, 
         oracleOwner: Account,
         productOwner: Account,
+        riskpoolToken: Account,
+        riskpoolWallet: Account,
         instance: GifInstance, 
         networkName:str = NETWORK_NAME,
         publishSource:bool = False
@@ -32,6 +34,9 @@ class Fire(Product):
             productOwner, 
             FireOracle,
             oracleOwner,
+            FireRiskpool,
+            riskpoolToken,
+            riskpoolWallet,
             instance,
             publishSource)
 

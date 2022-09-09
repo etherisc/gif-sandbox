@@ -11,6 +11,8 @@ from server.product import GifInstance
 from server.request import Request, Response
 from server.watcher import FireOracleWatcher
 
+from brownie.project.Project import FireCoin
+
 class Node(object):
 
     # account numbers for sandbox accounts derived from config mnemonic
@@ -18,6 +20,7 @@ class Node(object):
     ORACLE_OWNER =1
     PRODUCT_OWNER = 2
     CUSTOMER = 3
+    RISKPOOL_WALLET = 4
 
     # initial capitalization of fire insurance product in wei
     INITIAL_CAPITALIZATION = 10**6
@@ -55,6 +58,10 @@ class Node(object):
         self._oracleOwner = account.getBrownieAccount(Node.ORACLE_OWNER)
         self._productOwner = account.getBrownieAccount(Node.PRODUCT_OWNER)
         self._customer = account.getBrownieAccount(Node.CUSTOMER)
+        self._riskpoolWallet = account.getBrownieAccount(Node.RISKPOOL_WALLET)
+
+        logging.info("deploying FireToken")
+        self._fireCoin = FireCoin.deploy({"from": self._instanceOwner})
 
         # set up gif instance
         registryAddress = config.registry_address
@@ -70,6 +77,8 @@ class Node(object):
         self._fire = Fire(
             self._oracleOwner,
             self._productOwner,
+            self._fireCoin,
+            self._riskpoolWallet,
             self._instance)
 
         # capitalisation of product contract
@@ -87,10 +96,12 @@ class Node(object):
         self._config = Config(
             product_address = self._fire.product.contract.address,
             oracle_address = self._fire.oracle.contract.address,
+            firecoin_address = self._fireCoin.address,
             mnemonic = config.mnemonic,
             product_account_no = Node.PRODUCT_OWNER,
             oracle_account_no = Node.ORACLE_OWNER,
-            customer_account_no = Node.CUSTOMER)
+            customer_account_no = Node.CUSTOMER,
+            riskpool_wallet_account_no = Node.RISKPOOL_WALLET)
 
     @property
     def requests(self) -> List[Request]:

@@ -176,7 +176,7 @@ Clicking on **Execute** in the UI will trigger the deployment of the "Fire Insur
   "mnemonic": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
 }
 ```
-After a successful deploy the product and oracle addresses of the fire insurance are shown in the response body field. PLEASE NOTE: You should save the product address for later.
+After a successful deploy the product, riskpool and oracle addresses as well as the FireCoin token (for payment) of the fire insurance are shown in the response body field. PLEASE NOTE: You should save those addresses for later.
 
 ```json
 {
