@@ -9,6 +9,7 @@ class Config(BaseModel):
     oracle_account_no:int = None
     customer_account_no:int = None
     riskpool_wallet_account_no:int = None
+    investor_account_no:int = None
 
 class PostConfig(BaseModel):
     registry_address: str = None

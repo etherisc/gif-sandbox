@@ -24,6 +24,7 @@ class Fire(Product):
         productOwner: Account,
         riskpoolToken: Account,
         riskpoolWallet: Account,
+        investor: Account,
         instance: GifInstance, 
         networkName:str = NETWORK_NAME,
         publishSource:bool = False
@@ -37,6 +38,7 @@ class Fire(Product):
             FireRiskpool,
             riskpoolToken,
             riskpoolWallet,
+            investor,
             instance,
             publishSource)
 

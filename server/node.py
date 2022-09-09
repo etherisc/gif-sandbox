@@ -21,6 +21,7 @@ class Node(object):
     PRODUCT_OWNER = 2
     CUSTOMER = 3
     RISKPOOL_WALLET = 4
+    INVESTOR = 5
 
     # initial capitalization of fire insurance product in wei
     INITIAL_CAPITALIZATION = 10**6
@@ -59,9 +60,13 @@ class Node(object):
         self._productOwner = account.getBrownieAccount(Node.PRODUCT_OWNER)
         self._customer = account.getBrownieAccount(Node.CUSTOMER)
         self._riskpoolWallet = account.getBrownieAccount(Node.RISKPOOL_WALLET)
+        self._investor = account.getBrownieAccount(Node.INVESTOR)
 
-        logging.info("deploying FireToken")
-        self._fireCoin = FireCoin.deploy({"from": self._instanceOwner})
+        customerBalance = 1000 * (10 ** 6)
+
+        logging.info("deploying FireToken and funding customer with 1000 FireCoins")
+        self._fireCoin = FireCoin.deploy({"from": self._investor})
+        self._fireCoin.transfer(self._customer, customerBalance)
 
         # set up gif instance
         registryAddress = config.registry_address
@@ -79,15 +84,27 @@ class Node(object):
             self._productOwner,
             self._fireCoin,
             self._riskpoolWallet,
-            self._instance)
+            self._investor,
+            self._instance
+            )
+
+        bundleFunding = 10000 * (10 ** 6)
+
+        logging.info("Funding a riskpool bundle with 10000 FireCoins")
+        self._fireCoin.approve(self._instance.treasury, bundleFunding, {'from': self._investor})
+        applicationFilter = bytes(0)
+        logging.info(self._investor.balance())
+        logging.info(self._fireCoin.balanceOf(self._investor))
+        logging.info(self._fireCoin.allowance(self._investor, self._instance.treasury))
+        self._fire.riskpool.contract.createBundle(applicationFilter, bundleFunding, {"from": self._investor})
 
         # capitalisation of product contract
         logging.info('initial capitalization by product owner with {} wei'.format(
             Node.INITIAL_CAPITALIZATION))
         
-        self._fire.product.contract.deposit({
-            'from': self._productOwner,
-            'amount': Node.INITIAL_CAPITALIZATION})
+        # self._fire.product.contract.deposit({
+        #     'from': self._productOwner,
+        #     'amount': Node.INITIAL_CAPITALIZATION})
 
         logging.info('setting up log event watcher')
         watcher = FireOracleWatcher(self._fire, self._requests)

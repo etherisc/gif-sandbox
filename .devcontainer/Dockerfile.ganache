@@ -9,5 +9,5 @@ CMD ganache-cli \
     --chainId 1234 \
     --port 7545 \
     --accounts 20 \
-    --db .ganache \
+    #--db .ganache \
     -h "0.0.0.0"

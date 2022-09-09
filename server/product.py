@@ -25,7 +25,7 @@ class GifInstance(object):
 
         isAddress = self.registry.getContract(s2b32('InstanceService'))
         self.instanceService = getContract(interface.IInstanceService, isAddress)
-
+        
         logging.info('validating read access: products {}, oracles {}'.format(
             self.instanceService.products(),
             self.instanceService.oracles(),
@@ -33,6 +33,7 @@ class GifInstance(object):
 
         iosAddress = self.instanceService.getInstanceOperatorService()
         cosAddress = self.instanceService.getComponentOwnerService()        
+        self.treasury = self.instanceService.getTreasuryAddress()
 
         logging.info('validating services. ios {} cos {}'.format(
             iosAddress,
@@ -116,6 +117,7 @@ class GifRiskpool(GifProductComponent):
         token: Account,
         wallet: Account,
         owner: Account,
+        investor: Account,
         instance:GifInstance,
         publishSource: bool = False
     ):
@@ -145,6 +147,11 @@ class GifRiskpool(GifProductComponent):
             {'from': owner},
             publish_source = publishSource)
 
+        self.riskpool.grantInvestorRole(
+            investor,
+            {'from': owner},
+        )
+
         instance.componentOwnerService.propose(
             self.riskpool,
             {'from': owner}
@@ -156,6 +163,31 @@ class GifRiskpool(GifProductComponent):
         instance.instanceOperatorService.approve(
             self.id, 
             {'from': instance.owner})
+
+        instance.instanceOperatorService.setRiskpoolWallet(
+            self.riskpool.getId(),
+            wallet,
+            {'from': instance.owner})
+
+        # 7) setup capital fees
+        fixedFee = 42
+        fractionalFee = instance.instanceService.getFeeFractionFullUnit() / 20 # corresponds to 5%
+        print('7) creating capital fee spec (fixed: {}, fractional: {}) for riskpool id {} by instance operator {}'.format(
+            fixedFee, fractionalFee, self.riskpool.getId(), instance.owner))
+        
+        feeSpec = instance.instanceOperatorService.createFeeSpecification(
+            self.riskpool.getId(),
+            fixedFee,
+            fractionalFee,
+            b'',
+            {'from': instance.owner}) 
+
+        print('8) setting capital fee spec by instance operator {}'.format(
+            instance.owner))
+        
+        instance.instanceOperatorService.setCapitalFees(
+            feeSpec,
+            {'from': instance.owner}) 
 
     @property
     def id(self):
@@ -231,6 +263,7 @@ class Product(object):
         riskpoolClass,
         riskpoolToken: Account,
         riskpoolWallet: Account,
+        investor: Account,
         instance:GifInstance,
         publishSource:bool = False
     ):
@@ -249,6 +282,7 @@ class Product(object):
             riskpoolToken,
             riskpoolWallet,
             oracleOwner,
+            investor,
             instance, 
             publishSource)
         
