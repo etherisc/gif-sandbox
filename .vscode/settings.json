@@ -1,0 +1,32 @@
+{
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "solidity.remappingsUnix": [
+        "@openzeppelin/=/home/vscode/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.0",
+        "@etherisc/gif-interface/=/home/vscode/.brownie/packages/etherisc/gif-interface@c958220",
+    ],
+    "peacock.remoteColor": "#3f1a07",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#6d2d0c",
+        "activityBar.background": "#6d2d0c",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#000000",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#e7e7e799",
+        "sash.hoverBorder": "#6d2d0c",
+        "statusBar.background": "#3f1a07",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#6d2d0c",
+        "statusBarItem.remoteBackground": "#3f1a07",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#3f1a07",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#3f1a0799",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+}
