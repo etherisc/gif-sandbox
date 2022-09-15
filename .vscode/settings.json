@@ -6,9 +6,10 @@
     "python.testing.pytestEnabled": true,
     "terminal.integrated.defaultProfile.linux": "zsh",
     "solidity.remappingsUnix": [
-        "@openzeppelin/=/home/vscode/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.0",
-        "@etherisc/gif-interface/=/home/vscode/.brownie/packages/etherisc/gif-interface@c958220",
+        "@openzeppelin/=/home/vscode/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.7.3",
+        "@etherisc/gif-interface/=/home/vscode/.brownie/packages/etherisc/gif-interface@09b3317",
     ],
+    "solidity.compileUsingRemoteVersion": "v0.8.2+commit.661d1103",
     "peacock.remoteColor": "#3f1a07",
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#6d2d0c",
