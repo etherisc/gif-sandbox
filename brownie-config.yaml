@@ -8,8 +8,8 @@ compiler:
             runs: 200
         # https://eth-brownie.readthedocs.io/en/stable/compile.html#compiler-settings
         remappings:
-        - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.0"
-        - "@etherisc/gif-interface=etherisc/gif-interface@c958220"
+        - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.3"
+        - "@etherisc/gif-interface=etherisc/gif-interface@09b3317"
     vyper:
         version: null
 
@@ -22,8 +22,8 @@ networks:
 # to list the packages installed via the dependency list below
 dependencies:
     # github dependency format: <owner>/<repository>@<release>
-    - OpenZeppelin/openzeppelin-contracts@4.7.0
-    - etherisc/gif-interface@c958220
+    - OpenZeppelin/openzeppelin-contracts@4.7.3
+    - etherisc/gif-interface@09b3317
 
 # exclude Ownable when calculating test coverage
 # https://eth-brownie.readthedocs.io/en/v1.10.3/config.html#exclude_paths

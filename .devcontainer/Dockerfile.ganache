@@ -2,7 +2,7 @@ FROM node:lts-bullseye
 
 EXPOSE 7545
 
-RUN npm install -g ganache-cli
+RUN npm install -g ganache
 
 CMD ganache-cli \
     --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
