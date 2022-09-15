@@ -1,3 +1,7 @@
+![Build](https://github.com/etherisc/gif-sandbox/actions/workflows/build.yml/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![](https://dcbadge.vercel.app/api/server/Qb6ZjgE8?style=flat)](https://discord.gg/Qb6ZjgE8)
+
 # GIF Sandbox
 
 This GIF sandbox repository has the aim to provide a hands-on introduction into working with decentralized insurance products based on Generalized Insurance Framework (GIF) created by Etherisc. 
