@@ -95,8 +95,10 @@ class Node(object):
         applicationFilter = bytes(0)
         logging.info(self._investor.balance())
         logging.info(self._fireCoin.balanceOf(self._investor))
+        logging.info(self._fireCoin.balanceOf(self._instance.treasury))
         logging.info(self._fireCoin.allowance(self._investor, self._instance.treasury))
-        self._fire.riskpool.contract.createBundle(applicationFilter, bundleFunding, {"from": self._investor})
+        logging.info(bundleFunding)
+        self._fire.riskpool.contract.createBundle(applicationFilter, bundleFunding, {'from': self._investor})
 
         # capitalisation of product contract
         logging.info('initial capitalization by product owner with {} wei'.format(
