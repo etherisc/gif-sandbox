@@ -1,0 +1,125 @@
+name: Build
+
+on: 
+  workflow_dispatch:
+  push:
+    branches: [ main, develop ]
+    tags:
+    - '*'
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:  
+  test:
+    name: Compile and run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Setup node environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Prepare environment
+        run: .github/workflows/scripts/prepare_environment.sh
+
+      - name: Compile contracts
+        run: brownie compile --all
+      - run: touch .env
+      - run: .github/workflows/scripts/touch_gif_package_dotenv.sh
+      - name: Execute tests
+        run: brownie test -n auto
+        
+      - name: Install solhint linter
+        run: npm install --global solhint
+      - name: Run solhint linter
+        run: solhint contracts/**/*.sol
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: contracts
+          path: |
+            build
+
+  publish:
+    name: Publish package to npmjs
+    runs-on: ubuntu-latest
+    needs: [test]
+    # only run if tests successful
+    if: ${{ github.ref != 'refs/heads/main' && contains(join(needs.*.result, ','), 'success') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: contracts
+          path: build
+
+      - name: Setup node environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: 'https://registry.npmjs.org'
+
+      - run: npm ci
+
+      - name: Set build version identifier
+        run: npm version "`npm version patch --no-git-tag-version`-`git rev-parse --short HEAD`" --no-git-tag-version
+
+      - run: npm publish --tag next
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPMJS_ACCESS_TOKEN }}
+  
+  deployment:
+    name: Execute test deployment to local ganache chain
+    runs-on: ubuntu-latest
+    needs: [test]
+    # only run if tests successfull
+    if: ${{ contains(join(needs.*.result, ','), 'success') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Setup node environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      
+      - name: Prepare environment
+        run: .github/workflows/scripts/prepare_environment.sh
+          
+      - name: Compile contracts
+        run: brownie compile --all
+      - run: touch .env
+      - run: .github/workflows/scripts/touch_gif_package_dotenv.sh
+
+      # shell does not read .bashrc so nvm must be sourced manually each time
+      - name: Start ganache
+        run: |
+          ganache \
+            --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
+            --chain.chainId 1234 \
+            --port 7545 \
+            --accounts 20 \
+            --database.dbPath .github/workflows/ganache-gif/ \
+            -q &
+
+      - name: Execute deployment
+        run: |
+          brownie networks add Local ganache host=http://127.0.0.1:7545 chainid=1234
+          brownie run test_deployment.py --network=ganache 
+

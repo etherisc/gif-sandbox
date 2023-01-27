@@ -1,3 +1,15 @@
+# secrets management via .env (excluded via .gitignore)
+dotenv: .env
+
+networks:
+    default: development
+    development:
+        gas_price: 1 # (1 wei)
+        cmd_settings:
+            # without this explicit setting chainid==1 is returend by block.chainid
+            accounts: 20
+            chain_id: 1337
+
 # brownie default values made explicit
 compiler:
     evm_version: null
@@ -8,21 +20,41 @@ compiler:
             runs: 200
         # https://eth-brownie.readthedocs.io/en/stable/compile.html#compiler-settings
         remappings:
-          - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.0"
-          - "@gif-interface=etherisc/gif-interface@1.5.0-staging-j"
-    vyper:
-        version: null
+            - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.7.3"
+            - "@chainlink=smartcontractkit/chainlink@1.10.0"
+            - "@etherisc/gif-interface=etherisc/gif-interface@a8c9822"
+            - "@etherisc/gif-contracts=etherisc/gif-contracts@0a64b7e"
 
 # packages below will be added to brownie
 # you may use 'brownie pm list' after 'brownie compile' 
 # to list the packages installed via the dependency list below
 dependencies:
+    # **Important**: If you update any version here, please also update them in .vscode/settings.json section 'solidity.remappingsUnix'
     # github dependency format: <owner>/<repository>@<release>
-    - OpenZeppelin/openzeppelin-contracts@4.7.0
-    - etherisc/gif-interface@1.5.0-staging-j
+    - OpenZeppelin/openzeppelin-contracts@4.7.3
+    - smartcontractkit/chainlink@1.10.0
+    - etherisc/gif-interface@a8c9822
+    - etherisc/gif-contracts@0a64b7e
 
-# exclude Ownable when calculating test coverage
+# exclude open zeppeling contracts  when calculating test coverage
 # https://eth-brownie.readthedocs.io/en/v1.10.3/config.html#exclude_paths
-# reports:
-#   exclude_contracts:
-#     - Ownable
+reports:
+  exclude_contracts:
+    # chainlink
+    - ChainlinkClient
+    - Operator
+    # openzeppelin
+    - AccessControl
+    - AccessControlEnumerable
+    - Context
+    - Ownable
+    - EnumerableMap
+    - EnumerableSet
+    - ERC1967Proxy
+    - ERC20
+    - ERC721
+    - IERC20
+    - IERC721
+    - Initializable
+    - SafeERC20
+    - Strings

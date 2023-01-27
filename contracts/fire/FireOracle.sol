@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.2;
 
-import "@gif-interface/contracts/components/Oracle.sol";
+import "@etherisc/gif-interface/contracts/components/Oracle.sol";
 
 contract FireOracle is Oracle {
 
@@ -25,6 +25,10 @@ contract FireOracle is Oracle {
         // decode oracle input data
         (string memory objectName) = abi.decode(input, (string));
         emit LogFireOracleRequest(requestId, objectName);
+    }
+
+    function cancel(uint256 requestId) external override {
+        // nothing to implement for this demo case
     }
 
     function respond(uint256 requestId, bytes1 fireCategory) 

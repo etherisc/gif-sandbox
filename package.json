@@ -1,0 +1,33 @@
+{
+  "name": "@etherisc/depeg-contracts",
+  "version": "0.0.1",
+  "description": "Etherisc's smart contracts for a depeg insurance for stable coins.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etherisc/depeg-contracts.git"
+  },
+  "files": [
+    "contracts/**/*sol",
+    "build/**/*"
+  ],
+  "keywords": [
+    "etherisc",
+    "dip",
+    "gif",
+    "insurance",
+    "blockchain",
+    "ethereum",
+    "solidity",
+    "depeg"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://www.etherisc.com",
+  "bugs": {
+    "url": "https://github.com/etherisc/depeg-contracts/issues"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "0.4.1",
+    "@etherisc/gif-interface": "2.0.0-a8c9822",
+    "@openzeppelin/contracts": "4.7.3"
+  }
+}

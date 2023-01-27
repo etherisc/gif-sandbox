@@ -1,0 +1,14 @@
+FROM node:lts-bullseye
+
+EXPOSE 7545
+
+RUN npm install -g ganache@7.6.0
+RUN mkdir /ganache
+
+CMD ganache-cli \
+    --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
+    --chain.chainId 1337 \
+    --port 7545 \
+    --accounts 20 \
+    --database.dbPath /ganache \
+    -h "0.0.0.0"

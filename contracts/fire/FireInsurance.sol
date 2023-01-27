@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.0;
 
+import "@etherisc/gif-interface/contracts/components/Product.sol";
+
 import "./FireOracle.sol";
-import "@gif-interface/contracts/components/Product.sol";
 
 contract FireInsurance is Product {
 
@@ -25,15 +26,17 @@ contract FireInsurance is Product {
     event LogFirePolicyCreated(address policyHolder, string objectName, bytes32 policyId);
     event LogFirePolicyExpired(string objectName, bytes32 policyId);
     event LogFireOracleCallbackReceived(uint256 requestId, bytes32 policyId, bytes fireCategory);
-    event LogFireClaimConfirmed(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
+    event LogFireClaimConfirmed(bytes32 policyId, uint256 claimId, uint256 payoutAmount);
     event LogFirePayoutExecuted(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
 
     constructor(
         bytes32 productName,
-        address registry,
-        uint256 oracleId
+        address token,
+        uint256 oracleId,
+        uint256 riskpoolId,
+        address registry
     )
-        Product(productName, POLICY_FLOW, registry)
+        Product(productName, token, POLICY_FLOW, riskpoolId, registry)
     {
         fireOracleId = oracleId;
     }
@@ -59,15 +62,14 @@ contract FireInsurance is Product {
 
         // Validate input parameters
         require(premium > 0, "ERROR:FI-001:INVALID_PREMIUM");
-        require(PAYOUT_FACTOR_MEDIUM * premium < address(this).balance, "ERROR:FI-002:INSUFFICIENT_CAPITAL");
         require(!activePolicy[objectName], "ERROR:FI-003:ACTIVE_POLICY_EXISTS");
 
-        // Create new ID for this policy
-        uniqueIndex++;
-        policyId = keccak256(abi.encode(getId(), policyHolder, objectName, uniqueIndex));
-
         // Create and underwrite new application
-        _newApplication(policyId, abi.encode(policyHolder, objectName, premium));
+        uint256 sumInsured = 20 * premium;
+        bytes memory metaData = "";
+        bytes memory applicationData = abi.encode(objectName);
+
+        policyId = _newApplication(policyHolder, premium, sumInsured, metaData, applicationData);
         _underwrite(policyId);
 
         // Update activ state for object
@@ -86,8 +88,12 @@ contract FireInsurance is Product {
 
     function expirePolicy(bytes32 policyId) external {
         // Get policy data 
-        (address payable policyHolder, string memory objectName, uint256 premium) = abi.decode(
-            _getApplicationData(policyId), (address, string, uint256));
+        bytes memory applicationData = _getApplication(policyId).data;
+        (
+            address payable policyHolder, 
+            string memory objectName, 
+            uint256 premium
+        ) = abi.decode(applicationData, (address, string, uint256));
 
         // Validate input parameter
         require(premium > 0, "ERROR:FI-004:NON_EXISTING_POLICY");
@@ -106,8 +112,12 @@ contract FireInsurance is Product {
         emit LogFireOracleCallbackReceived(requestId, policyId, response);
 
         // Get policy data for oracle response
-        (address payable policyHolder, string memory objectName, uint256 premium) = abi.decode(
-            _getApplicationData(policyId), (address, string, uint256));
+        bytes memory applicationData = _getApplication(policyId).data;
+        (
+            address payable policyHolder, 
+            string memory objectName, 
+            uint256 premium
+        ) = abi.decode(applicationData, (address, string, uint256));
 
         // Validate input parameter
         require(activePolicy[objectName], "ERROR:FI-006:EXPIRED_POLICY");
@@ -129,20 +139,15 @@ contract FireInsurance is Product {
     {
         uint256 payoutAmount = _calculatePayoutAmount(premium, fireCategory);
 
-        // Ensure available capital
-        require(payoutAmount < address(this).balance, "ERROR:FI-007:INSOLVENT_PRODUCT");
-
         // no claims handling for payouts == 0
-        uint256 claimId = _newClaim(policyId, abi.encode(payoutAmount));
-        uint256 payoutId = _confirmClaim(policyId, claimId, abi.encode(payoutAmount));
-
-        emit LogFireClaimConfirmed(policyId, claimId, payoutId, payoutAmount);
-
         if (payoutAmount > 0) {
-            _payout(policyId, payoutId, true, abi.encode(payoutAmount));
+            uint256 claimId = _newClaim(policyId, payoutAmount, "");
+            _confirmClaim(policyId, claimId, payoutAmount);
 
-            // actual transfer of funds for payout of claim
-            policyHolder.transfer(payoutAmount);
+            emit LogFireClaimConfirmed(policyId, claimId, payoutAmount);
+
+            uint256 payoutId = _newPayout(policyId, claimId, payoutAmount, "");
+            _processPayout(policyId, payoutId);
 
             emit LogFirePayoutExecuted(policyId, claimId, payoutId, payoutAmount);
         }
