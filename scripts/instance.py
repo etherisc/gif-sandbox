@@ -122,6 +122,11 @@ class GifInstance(GifRegistry):
         self.instanceOperatorService = contract_from_address(
             gif.InstanceOperatorService,
             registry.getContract(s2b('InstanceOperatorService')))
+        
+        # other contracts needed
+        self.treasury = contract_from_address(
+            gif.TreasuryModule,
+            registry.getContract(s2b('Treasury')))
 
 
     def deployWithRegistry(self):
