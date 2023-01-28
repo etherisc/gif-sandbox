@@ -24,11 +24,11 @@ contract FireProduct is Product {
     mapping(string => bool) public activePolicy;
 
     // events
-    event LogFirePolicyCreated(address policyHolder, string objectName, bytes32 policyId);
-    event LogFirePolicyExpired(string objectName, bytes32 policyId);
-    event LogFireOracleCallbackReceived(uint256 requestId, bytes32 policyId, bytes fireCategory);
-    event LogFireClaimConfirmed(bytes32 policyId, uint256 claimId, uint256 payoutAmount);
-    event LogFirePayoutExecuted(bytes32 policyId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
+    event LogFirePolicyCreated(bytes32 processId, address policyHolder, uint256 sumInsured, string objectName);
+    event LogFirePolicyExpired(string objectName, bytes32 processId);
+    event LogFireOracleCallbackReceived(uint256 requestId, bytes32 processId, bytes fireCategory);
+    event LogFireClaimConfirmed(bytes32 processId, uint256 claimId, uint256 payoutAmount);
+    event LogFirePayoutExecuted(bytes32 processId, uint256 claimId, uint256 payoutId, uint256 payoutAmount);
 
     constructor(
         bytes32 productName,
@@ -52,7 +52,7 @@ contract FireProduct is Product {
     }
 
     function decodeApplicationParameterFromData(bytes memory data) 
-        external
+        public
         pure
         returns(string memory objectName)
     {
@@ -106,26 +106,24 @@ contract FireProduct is Product {
             _oracleId
         );
 
-        emit LogFirePolicyCreated(policyHolder, objectName, processId);
+        emit LogFirePolicyCreated(processId, policyHolder, sumInsuredAmount, objectName);
     }
 
-    function expirePolicy(bytes32 policyId) external {
+    function expirePolicy(bytes32 processId)
+        external
+        onlyOwner
+    {
         // Get policy data 
-        bytes memory applicationData = _getApplication(policyId).data;
-        (
-            address payable policyHolder, 
-            string memory objectName, 
-            uint256 premium
-        ) = abi.decode(applicationData, (address, string, uint256));
+        IPolicy.Application memory application = _getApplication(processId);
+        (string memory objectName) = decodeApplicationParameterFromData(application.data);
 
         // Validate input parameter
-        require(premium > 0, "ERROR:FI-004:NON_EXISTING_POLICY");
         require(activePolicy[objectName], "ERROR:FI-005:EXPIRED_POLICY");
 
-        _expire(policyId);
+        _expire(processId);
         activePolicy[objectName] = false;
 
-        emit LogFirePolicyExpired(objectName, policyId);
+        emit LogFirePolicyExpired(objectName, processId);
     }
 
     function oracleCallback(uint256 requestId, bytes32 policyId, bytes calldata response)
