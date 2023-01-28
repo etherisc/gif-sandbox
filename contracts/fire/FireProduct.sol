@@ -11,6 +11,10 @@ contract FireProduct is Product {
     bytes32 public constant VERSION = "0.0.1";
     bytes32 public constant POLICY_FLOW = "PolicyDefaultFlow";
 
+    // leads to %5 premiums on object value
+    uint256 public constant OBJECT_VALUE_DIVISOR = 20; 
+
+    // payout specs
     uint256 public constant PAYOUT_FACTOR_MEDIUM = 5;
     uint256 public constant PAYOUT_FACTOR_LARGE = 100;
 
@@ -69,22 +73,23 @@ contract FireProduct is Product {
     }
 
     function applyForPolicy(
-        string calldata objectName,
-        uint256 premiumAmount,
-        uint256 sumInsuredAmount
+        string memory objectName,
+        uint256 objectValue
     )
         external 
         returns (bytes32 processId, uint256 requestId) 
     {
         // Validate input parameters
-        require(premiumAmount > 0, "ERROR:FI-010:INVALID_PREMIUM");
+        require(objectValue > 0, "ERROR:FI-010:OBJECT_VALUE_ZERO");
         require(!activePolicy[objectName], "ERROR:FI-011:ACTIVE_POLICY_EXISTS");
 
         // Create and underwrite new application
         address policyHolder = msg.sender;
+        uint256 premiumAmount = calculatePremium(objectValue);
+        uint256 sumInsuredAmount = objectValue;
         bytes memory metaData = "";
         bytes memory applicationData = encodeApplicationParametersToData(objectName);
-
+        
         processId = _newApplication(
             policyHolder, 
             premiumAmount, 
@@ -107,6 +112,11 @@ contract FireProduct is Product {
         );
 
         emit LogFirePolicyCreated(processId, policyHolder, sumInsuredAmount, objectName);
+    }
+
+
+    function calculatePremium(uint256 objectValue) public pure returns(uint256 premiumAmount) {
+        return objectValue / OBJECT_VALUE_DIVISOR;
     }
 
     function expirePolicy(bytes32 processId)
