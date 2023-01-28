@@ -291,7 +291,7 @@ class GifFireProductComplete(object):
         self.oracle = GifFireOracle(
             instance, 
             oracleProvider, 
-            '{}Oracle'.format(baseName),
+            '{}_Oracle'.format(baseName),
             publishSource)
 
         self.riskpool = GifFireRiskpool(
@@ -301,7 +301,7 @@ class GifFireProductComplete(object):
             riskpoolWallet, 
             investor, 
             instanceService.getFullCollateralizationLevel(),
-            '{}Riskpool'.format(baseName),
+            '{}_Riskpool'.format(baseName),
             publishSource)
 
         self.product = GifFireProduct(
@@ -310,7 +310,7 @@ class GifFireProductComplete(object):
             productOwner, 
             self.oracle,
             self.riskpool,
-            '{}Product'.format(baseName),
+            '{}_Product'.format(baseName),
             publishSource)
 
     def getToken(self):

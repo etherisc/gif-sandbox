@@ -17,11 +17,9 @@ contract FireProduct is Product {
     string public constant CALLBACK_METHOD_NAME = "oracleCallback";
 
     // variables
-    uint256 public fireOracleId;
-    uint256 public fireRiskpoolId;
-
     // TODO should be framework feature
     bytes32 [] private _applications; // useful for debugging, might need to get rid of this
+    uint256 public _oracleId;
 
     mapping(string => bool) public activePolicy;
 
@@ -41,8 +39,7 @@ contract FireProduct is Product {
     )
         Product(productName, token, POLICY_FLOW, riskpoolId, registry)
     {
-        fireOracleId = oracleId;
-        fireRiskpoolId = riskpoolId;
+        _oracleId = oracleId;
     }
 
     function applications() external view returns(uint256 numberOfApplications) {
@@ -106,7 +103,7 @@ contract FireProduct is Product {
             processId,
             abi.encode(objectName),
             CALLBACK_METHOD_NAME,
-            fireOracleId
+            _oracleId
         );
 
         emit LogFirePolicyCreated(policyHolder, objectName, processId);
@@ -154,6 +151,12 @@ contract FireProduct is Product {
         // Claim handling based on reponse to greeting provided by oracle 
         _handleClaim(policyId, policyHolder, premium, fireCategory);
     }
+
+
+    function getOracleId() external view returns(uint256 oracleId) {
+        return _oracleId;
+    }
+
 
     function _handleClaim(
         bytes32 policyId, 

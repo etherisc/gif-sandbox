@@ -4,17 +4,10 @@ from brownie import (
     interface,
     Wei,
     Contract, 
-    USD1,
-    USD2,
-    USD3,
-    UsdcPriceDataProvider,
-    DepegProduct,
-    DepegRiskpool,
-    InstanceRegistry,
-    ComponentRegistry,
-    BundleRegistry,
-    Staking,
-    DIP
+    Usdc,
+    FireProduct,
+    FireOracle,
+    FireRiskpool
 )
 
 from brownie.network import accounts
@@ -32,10 +25,11 @@ from scripts.instance import (
     GifInstance,
 )
 
-from scripts.depeg_product import (
-    GifDepegProduct,
-    GifDepegRiskpool,
-    GifDepegProductComplete,
+from scripts.product_fire import (
+    GifFireProduct,
+    GifFireOracle,
+    GifFireRiskpool,
+    GifFireProductComplete,
 )
 
 def get_filled_account(accounts, account_no, funding) -> Account:
@@ -56,6 +50,14 @@ def run_around_tests():
         accounts[8].transfer(accounts[9], 1)
         # dummy_account = get_account(ACCOUNTS_MNEMONIC, 999)
         # execute_simple_incrementer_trx(dummy_account)
+
+#=== access to gif-contracts contract classes  =======================#
+
+@pytest.fixture(scope="module")
+def gifi(): return get_package('gif-interface')
+
+@pytest.fixture(scope="module")
+def gif(): return get_package('gif-contracts')
 
 #=== actor account fixtures  ===========================================#
 
@@ -84,6 +86,10 @@ def productOwner(accounts) -> Account:
     return get_filled_account(accounts, 7, "1 ether")
 
 @pytest.fixture(scope="module")
+def oracleProvider(accounts) -> Account:
+    return get_filled_account(accounts, 8, "1 ether")
+
+@pytest.fixture(scope="module")
 def customer(accounts) -> Account:
     return get_filled_account(accounts, 9, "1 ether")
 
@@ -92,67 +98,8 @@ def customer2(accounts) -> Account:
     return get_filled_account(accounts, 10, "1 ether")
 
 @pytest.fixture(scope="module")
-def protectedWallet(accounts) -> Account:
-    return get_filled_account(accounts, 11, "1 ether")
-
-@pytest.fixture(scope="module")
-def protectedWallet2(accounts) -> Account:
-    return get_filled_account(accounts, 12, "1 ether")
-
-@pytest.fixture(scope="module")
-def registryOwner(accounts) -> Account:
-    return get_filled_account(accounts, 13, "1 ether")
-
-@pytest.fixture(scope="module")
 def theOutsider(accounts) -> Account:
     return get_filled_account(accounts, 19, "1 ether")
-
-
-
-@pytest.fixture(scope="module")
-def staker(accounts) -> Account:
-    return get_filled_account(accounts, 11, "1 ether")
-
-@pytest.fixture(scope="module")
-def staker2(accounts) -> Account:
-    return get_filled_account(accounts, 12, "1 ether")
-
-@pytest.fixture(scope="module")
-def stakerWithDips(staker, instanceOperator, dip) -> Account:
-    dips = 1000000 * 10**dip.decimals()
-    dip.transfer(staker, dips, {'from': instanceOperator})
-    return staker
-
-@pytest.fixture(scope="module")
-def staker2WithDips(staker2, instanceOperator, dip) -> Account:
-    dips = 1000000 * 10**dip.decimals()
-    dip.transfer(staker2, dips, {'from': instanceOperator})
-    return staker2
-
-#=== access to gif-contracts contract classes  =======================#
-
-@pytest.fixture(scope="module")
-def gifi(): return get_package('gif-interface')
-
-@pytest.fixture(scope="module")
-def gif(): return get_package('gif-contracts')
-
-#=== stable coin fixtures ============================================#
-
-@pytest.fixture(scope="module")
-def usd1(instanceOperator) -> USD1: return USD1.deploy({'from': instanceOperator})
-
-@pytest.fixture(scope="module")
-def usd2(instanceOperator) -> USD2: return USD2.deploy({'from': instanceOperator})
-
-@pytest.fixture(scope="module")
-def usd3(instanceOperator) -> USD3: return USD3.deploy({'from': instanceOperator})
-
-@pytest.fixture(scope="module")
-def dip(instanceOperator) -> DIP: return DIP.deploy({'from': instanceOperator})
-
-@pytest.fixture(scope="module")
-def testCoin(instanceOperator, gif) -> Contract: return gif.TestCoin.deploy({'from':instanceOperator})
 
 #=== gif instance fixtures ====================================================#
 
@@ -165,58 +112,40 @@ def instance(instanceOperator, instanceWallet) -> GifInstance: return GifInstanc
 @pytest.fixture(scope="module")
 def instanceService(instance): return instance.getInstanceService()
 
-#=== depeg deployed contracts fixtures ========================================#
+#=== stable coin fixtures ============================================#
 
 @pytest.fixture(scope="module")
-def usdc_feeder(usd1, productOwner) -> UsdcPriceDataProvider: 
-    return UsdcPriceDataProvider.deploy(usd1.address, {'from': productOwner})
+def usdc(instanceOperator) -> Usdc: return Usdc.deploy({'from': instanceOperator})
+
+#=== fire contracts fixtures ========================================#
 
 @pytest.fixture(scope="module")
-def gifDepegDeploy(
+def gifFireDeploy(
     instance: GifInstance, 
     productOwner: Account, 
     investor: Account, 
-    usdc_feeder,
-    usd2: USD2,
+    usdc,
+    oracleProvider: Account, 
     riskpoolKeeper: Account, 
     riskpoolWallet: Account
-) -> GifDepegProductComplete:
-    return GifDepegProductComplete(
+) -> GifFireProductComplete:
+    return GifFireProductComplete(
         instance, 
         productOwner, 
         investor,
-        usdc_feeder,
-        usd2,
+        usdc,
+        oracleProvider, 
         riskpoolKeeper, 
         riskpoolWallet)
 
 @pytest.fixture(scope="module")
-def gifDepegProduct(gifDepegDeploy) -> GifDepegProduct: return gifDepegDeploy.getProduct()
+def gifFireProduct(gifFireDeploy) -> GifFireProduct: return gifFireDeploy.getProduct()
 
 @pytest.fixture(scope="module")
-def product(gifDepegProduct) -> DepegProduct: return gifDepegProduct.getContract()
+def product(gifFireProduct) -> FireProduct: return gifFireProduct.getContract()
 
 @pytest.fixture(scope="module")
-def riskpool(gifDepegProduct) -> DepegRiskpool: return gifDepegProduct.getRiskpool().getContract()
-
-
-#=== staking fixtures ====================================================#
+def oracle(gifFireProduct) -> FireOracle: return gifFireProduct.getOracle().getContract()
 
 @pytest.fixture(scope="module")
-def instanceRegistry(registryOwner) -> InstanceRegistry: 
-    return InstanceRegistry.deploy({'from': registryOwner})
-
-
-@pytest.fixture(scope="module")
-def componentRegistry(registryOwner) -> ComponentRegistry: 
-    return ComponentRegistry.deploy({'from': registryOwner})
-
-
-@pytest.fixture(scope="module")
-def bundleRegistry(registryOwner) -> BundleRegistry: 
-    return BundleRegistry.deploy({'from': registryOwner})
-
-
-@pytest.fixture(scope="module")
-def staking(registryOwner, bundleRegistry) -> BundleRegistry: 
-    return Staking.deploy(bundleRegistry, {'from': registryOwner})
+def riskpool(gifFireProduct) -> FireRiskpool: return gifFireProduct.getRiskpool().getContract()

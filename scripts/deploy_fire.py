@@ -26,6 +26,10 @@ from scripts.util import (
 
 from os.path import exists
 
+CONTRACT_CLASS_PRODUCT = FireProduct
+CONTRACT_CLASS_ORACLE = FireOracle
+CONTRACT_CLASS_RISKPOOL = FireRiskpool
+
 # product specific constants
 OBJECT_NAME = 'My Home'
 
@@ -139,11 +143,10 @@ def verify_deploy(
     verify_element('ProductId', product.getId(), product_id)
     verify_element('ProductType', instanceService.getComponentType(product_id), 1)
     verify_element('ProductState', instanceService.getComponentState(product_id), 3)
-    verify_element('ProductDepegState', product.getDepegState(), 1) # active
     verify_element('ProductContract', product.address, instanceService.getComponent(product_id))
     verify_element('ProductOwner', product.owner(), productOwner)
-    verify_element('ProductProtectedToken', product.getProtectedToken(), erc20_protected_token.address)
     verify_element('ProductToken', product.getToken(), erc20_token.address)
+    verify_element('ProductOracle', product.getOracleId(), oracle_id)
     verify_element('ProductRiskpool', product.getRiskpoolId(), riskpool_id)
 
     print('InstanceWalletBalance {:.2f}'.format(erc20_token.balanceOf(instanceService.getInstanceWallet())/10**erc20_token.decimals()))
@@ -799,24 +802,28 @@ def inspect_bundles(d):
 def from_component(
     componentAddress,
     productId=0,
+    oracleId=0,
     riskpoolId=0
 ):
     component = contract_from_address(interface.IComponent, componentAddress)
-    return from_registry(component.getRegistry(), productId=productId, riskpoolId=riskpoolId)
+    return from_registry(component.getRegistry(), oracleId=oracleId, productId=productId, riskpoolId=riskpoolId)
 
 
 def from_registry(
     registryAddress,
     productId=0,
+    oracleId=0,
     riskpoolId=0
 ):
     instance = GifInstance(registryAddress=registryAddress)
     instanceService = instance.getInstanceService()
 
     products = instanceService.products()
+    oracles = instanceService.oracles()
     riskpools = instanceService.riskpools()
 
     product = None
+    oracle = None
     riskpool = None
 
     if products >= 1:
@@ -830,7 +837,7 @@ def from_registry(
                 print('returning last product available')
         
         componentAddress = instanceService.getComponent(componentId)
-        product = contract_from_address(DepegProduct, componentAddress)
+        product = contract_from_address(CONTRACT_CLASS_PRODUCT, componentAddress)
 
         if product.getType() != 1:
             product = None
@@ -839,6 +846,27 @@ def from_registry(
     else:
         print('1 product expected, no product available')
         print('no product returned (None)')
+
+    if oracles >= 1:
+        if oracleId > 0:
+            componentId = oracleId
+        else:
+            componentId = instanceService.getOracleId(oracles-1)
+
+            if oracles > 1:
+                print('1 oracle expected, {} oraclea available'.format(oracles))
+                print('returning last oracle available')
+        
+        componentAddress = instanceService.getComponent(componentId)
+        oracle = contract_from_address(CONTRACT_CLASS_ORACLE, componentAddress)
+
+        if oracle.getType() != 0:
+            oracle = None
+            print('component (type={}) with id {} is not oracle'.format(oracle.getType(), componentId))
+            print('no oracle returned (None)')
+    else:
+        print('1 oracle expected, no oracle available')
+        print('no oracle returned (None)')
 
     if riskpools >= 1:
         if riskpoolId > 0:
@@ -851,7 +879,7 @@ def from_registry(
                 print('returning last riskpool available')
         
         componentAddress = instanceService.getComponent(componentId)
-        riskpool = contract_from_address(DepegRiskpool, componentAddress)
+        riskpool = contract_from_address(CONTRACT_CLASS_RISKPOOL, componentAddress)
 
         if riskpool.getType() != 2:
             riskpool = None
@@ -861,7 +889,7 @@ def from_registry(
         print('1 riskpool expected, no riskpools available')
         print('no riskpool returned (None)')
 
-    return (instance, product, riskpool)
+    return (instance, product, oracle, riskpool)
 
 
 def _copy_map(map_in):
