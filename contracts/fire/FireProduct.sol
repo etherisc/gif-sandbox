@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.2;
 
 import "@etherisc/gif-interface/contracts/components/Product.sol";
 
 import "./FireOracle.sol";
 
-contract FireInsurance is Product {
+contract FireProduct is Product {
 
     // constants
     bytes32 public constant VERSION = "0.0.1";
-    bytes32 public constant POLICY_FLOW = "PolicyFlowDefault";
+    bytes32 public constant POLICY_FLOW = "PolicyDefaultFlow";
 
     uint256 public constant PAYOUT_FACTOR_MEDIUM = 5;
     uint256 public constant PAYOUT_FACTOR_LARGE = 100;
@@ -18,7 +18,10 @@ contract FireInsurance is Product {
 
     // variables
     uint256 public fireOracleId;
-    uint256 public uniqueIndex;
+    uint256 public fireRiskpoolId;
+
+    // TODO should be framework feature
+    bytes32 [] private _applications; // useful for debugging, might need to get rid of this
 
     mapping(string => bool) public activePolicy;
 
@@ -39,51 +42,74 @@ contract FireInsurance is Product {
         Product(productName, token, POLICY_FLOW, riskpoolId, registry)
     {
         fireOracleId = oracleId;
+        fireRiskpoolId = riskpoolId;
     }
 
-    // functions
-    function deposit() public payable {}
-    
-    function withdraw(uint256 amount) external onlyOwner {
-        require(amount <= address(this).balance);
-
-        address payable receiver;
-        receiver = payable(owner());
-        receiver.transfer(amount);
+    function applications() external view returns(uint256 numberOfApplications) {
+        return _applications.length;
     }
 
-    function applyForPolicy(string calldata objectName) 
-        external 
-        payable 
-        returns (bytes32 policyId, uint256 requestId) 
+    function getApplicationId(uint256 idx) external view returns(bytes32 processId) {
+        require(idx < _applications.length, "ERROR:FI-001:APPLICATION_INDEX_TOO_LARGE");
+        return _applications[idx];
+    }
+
+    function decodeApplicationParameterFromData(bytes memory data) 
+        external
+        pure
+        returns(string memory objectName)
     {
-        address payable policyHolder = payable(msg.sender);
-        uint256 premium = msg.value;
+        return abi.decode(data, (string));
+    }
 
+
+    function encodeApplicationParametersToData(string memory objectName)
+        public
+        pure
+        returns(bytes memory data)
+    {
+        return abi.encode(objectName);
+    }
+
+    function applyForPolicy(
+        string calldata objectName,
+        uint256 premiumAmount,
+        uint256 sumInsuredAmount
+    )
+        external 
+        returns (bytes32 processId, uint256 requestId) 
+    {
         // Validate input parameters
-        require(premium > 0, "ERROR:FI-001:INVALID_PREMIUM");
-        require(!activePolicy[objectName], "ERROR:FI-003:ACTIVE_POLICY_EXISTS");
+        require(premiumAmount > 0, "ERROR:FI-010:INVALID_PREMIUM");
+        require(!activePolicy[objectName], "ERROR:FI-011:ACTIVE_POLICY_EXISTS");
 
         // Create and underwrite new application
-        uint256 sumInsured = 20 * premium;
+        address policyHolder = msg.sender;
         bytes memory metaData = "";
-        bytes memory applicationData = abi.encode(objectName);
+        bytes memory applicationData = encodeApplicationParametersToData(objectName);
 
-        policyId = _newApplication(policyHolder, premium, sumInsured, metaData, applicationData);
-        _underwrite(policyId);
+        processId = _newApplication(
+            policyHolder, 
+            premiumAmount, 
+            sumInsuredAmount, 
+            metaData, 
+            applicationData);
 
+        _underwrite(processId);
+        
         // Update activ state for object
         activePolicy[objectName] = true;
+        _applications.push(processId);
 
         // trigger fire observation for object id via oracle call
         requestId = _request(
-            policyId,
+            processId,
             abi.encode(objectName),
             CALLBACK_METHOD_NAME,
             fireOracleId
         );
 
-        emit LogFirePolicyCreated(policyHolder, objectName, policyId);
+        emit LogFirePolicyCreated(policyHolder, objectName, processId);
     }
 
     function expirePolicy(bytes32 policyId) external {

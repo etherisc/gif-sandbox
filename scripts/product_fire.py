@@ -1,6 +1,6 @@
-from web3 import Web3
-
 import time
+
+from web3 import Web3
 
 from brownie.network.account import Account
 
@@ -8,14 +8,69 @@ from brownie import (
     interface,
     Wei,
     Contract, 
-    DepegProduct,
-    DepegRiskpool,
+    FireProduct,
+    FireOracle,
+    FireRiskpool,
 )
 
 from scripts.util import s2b
 from scripts.instance import GifInstance
 
-class GifDepegRiskpool(object):
+
+class GifFireOracle(object):
+
+    def __init__(self, 
+        instance: GifInstance, 
+        oracleProvider: Account, 
+        name, 
+        publishSource=False
+    ):
+        instanceService = instance.getInstanceService()
+        instanceOperatorService = instance.getInstanceOperatorService()
+        componentOwnerService = instance.getComponentOwnerService()
+
+        print('------ setting up oracle ------')
+
+        oracleProviderRole = instanceService.getOracleProviderRole()
+        print('1) grant oracle provider role {} to oracle provider {}'.format(
+            oracleProviderRole, oracleProvider))
+
+        instanceOperatorService.grantRole(
+            oracleProviderRole, 
+            oracleProvider, 
+            {'from': instance.getOwner()})
+
+        print('2) deploy oracle {} by oracle provider {}'.format(
+            name, oracleProvider))
+
+        self.oracle = FireOracle.deploy(
+            s2b(name),
+            instance.getRegistry(),
+            {'from': oracleProvider},
+            publish_source=publishSource)
+        
+        print('3) oracle {} proposing to instance by oracle provider {}'.format(
+            self.oracle, oracleProvider))
+        
+        componentOwnerService.propose(
+            self.oracle,
+            {'from': oracleProvider})
+
+        print('4) approval of oracle id {} by instance operator {}'.format(
+            self.oracle.getId(), instance.getOwner()))
+        
+        instanceOperatorService.approve(
+            self.oracle.getId(),
+            {'from': instance.getOwner()})
+    
+    def getId(self) -> int:
+        return self.oracle.getId()
+    
+    def getContract(self) -> FireOracle:
+        return self.oracle
+
+
+class GifFireRiskpool(object):
 
     def __init__(self, 
         instance: GifInstance, 
@@ -30,8 +85,6 @@ class GifDepegRiskpool(object):
         instanceService = instance.getInstanceService()
         instanceOperatorService = instance.getInstanceOperatorService()
         componentOwnerService = instance.getComponentOwnerService()
-        # TODO cleanup
-        # riskpoolService = instance.getRiskpoolService()
 
         print('------ setting up riskpool ------')
 
@@ -48,7 +101,7 @@ class GifDepegRiskpool(object):
             name, riskpoolKeeper))
 
         sumOfSumInsuredCap = 1000000 * 10 ** 6
-        self.riskpool = DepegRiskpool.deploy(
+        self.riskpool = FireRiskpool.deploy(
             s2b(name),
             sumOfSumInsuredCap,
             erc20Token,
@@ -110,21 +163,22 @@ class GifDepegRiskpool(object):
     def getId(self) -> int:
         return self.riskpool.getId()
     
-    def getContract(self) -> DepegRiskpool:
+    def getContract(self) -> FireRiskpool:
         return self.riskpool
 
 
-class GifDepegProduct(object):
+class GifFireProduct(object):
 
     def __init__(self,
         instance: GifInstance,
-        priceDataProvider: Account,
         erc20Token: Account,
         productOwner: Account,
-        riskpool: GifDepegRiskpool,
+        oracle: GifFireOracle,
+        riskpool: GifFireRiskpool,
         name,
         publishSource=False
     ):
+        self.oracle = oracle
         self.riskpool = riskpool
         self.token = erc20Token
 
@@ -147,12 +201,12 @@ class GifDepegProduct(object):
         print('2) deploy product by product owner {}'.format(
             productOwner))
         
-        self.product = DepegProduct.deploy(
+        self.product = FireProduct.deploy(
             s2b(name),
-            priceDataProvider.address,
             erc20Token.address,
-            registry,
+            oracle.getId(),
             riskpool.getId(),
+            registry,
             {'from': productOwner},
             publish_source=publishSource)
 
@@ -204,24 +258,27 @@ class GifDepegProduct(object):
     def getToken(self):
         return self.token
 
-    def getRiskpool(self) -> GifDepegRiskpool:
+    def getOracle(self) -> GifFireOracle:
+        return self.oracle
+
+    def getRiskpool(self) -> GifFireRiskpool:
         return self.riskpool
     
-    def getContract(self) -> DepegProduct:
+    def getContract(self) -> FireProduct:
         return self.product
 
 
-class GifDepegProductComplete(object):
+class GifFireProductComplete(object):
 
     def __init__(self,
         instance: GifInstance,
         productOwner: Account,
         investor: Account,
-        priceDataProvider: Account,
         erc20Token: Account,
+        oracleProvider: Account,
         riskpoolKeeper: Account,
         riskpoolWallet: Account,
-        baseName='Depeg' + str(int(time.time())),  # FIXME
+        baseName='Fire' + str(int(time.time())),  # FIXME
         publishSource=False
     ):
         instanceService = instance.getInstanceService()
@@ -231,7 +288,13 @@ class GifDepegProductComplete(object):
 
         self.token = erc20Token
 
-        self.riskpool = GifDepegRiskpool(
+        self.oracle = GifFireOracle(
+            instance, 
+            oracleProvider, 
+            '{}Oracle'.format(baseName),
+            publishSource)
+
+        self.riskpool = GifFireRiskpool(
             instance, 
             erc20Token, 
             riskpoolKeeper, 
@@ -241,11 +304,11 @@ class GifDepegProductComplete(object):
             '{}Riskpool'.format(baseName),
             publishSource)
 
-        self.product = GifDepegProduct(
+        self.product = GifFireProduct(
             instance,
-            priceDataProvider,
             erc20Token, 
             productOwner, 
+            self.oracle,
             self.riskpool,
             '{}Product'.format(baseName),
             publishSource)
@@ -253,8 +316,11 @@ class GifDepegProductComplete(object):
     def getToken(self):
         return self.token
 
-    def getRiskpool(self) -> GifDepegRiskpool:
+    def getOracle(self) -> GifFireOracle:
+        return self.oracle
+
+    def getRiskpool(self) -> GifFireRiskpool:
         return self.riskpool
 
-    def getProduct(self) -> GifDepegProduct:
+    def getProduct(self) -> GifFireProduct:
         return self.product
