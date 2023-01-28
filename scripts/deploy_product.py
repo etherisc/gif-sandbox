@@ -46,6 +46,7 @@ RISKPOOL_KEEPER = 'riskpoolKeeper'
 RISKPOOL_WALLET = 'riskpoolWallet'
 INVESTOR = 'investor'
 PRODUCT_OWNER = 'productOwner'
+INSURER = 'insurer'
 CUSTOMER1 = 'customer1'
 CUSTOMER2 = 'customer2'
 
@@ -175,8 +176,9 @@ def stakeholders_accounts_ganache():
     investor=accounts[4]
     oracleProvider=accounts[5]
     productOwner=accounts[6]
-    customer=accounts[7]
-    customer2=accounts[8]
+    insurer=accounts[7]
+    customer=accounts[8]
+    customer2=accounts[9]
 
     return {
         INSTANCE_OPERATOR: instanceOperator,
@@ -186,6 +188,7 @@ def stakeholders_accounts_ganache():
         INVESTOR: investor,
         ORACLE_PROVIDER: oracleProvider,
         PRODUCT_OWNER: productOwner,
+        INSURER: insurer,
         CUSTOMER1: customer,
         CUSTOMER2: customer2,
     }
