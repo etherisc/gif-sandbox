@@ -13,14 +13,15 @@ from scripts.util import (
     contract_from_address
 )
 
-from scripts.product_fire import (
-    GifFireProduct,
-    GifFireRiskpool,
+from scripts.product import (
+    GifProduct,
+    GifRiskpool,
 )
 
-from scripts.setup import (
-    create_bundle, 
-    apply_for_policy,
+from scripts.deploy_product import to_token_amount
+from scripts.deploy_fire import (
+    create_bundle,
+    create_policy
 )
 
 # enforce function isolation for tests below
@@ -40,33 +41,49 @@ def test_create_application(
 ):
     instanceWallet = instanceService.getInstanceWallet()
     riskpoolWallet = instanceService.getRiskpoolWallet(riskpool.getId())
-    tokenAddress = instanceService.getComponentToken(riskpool.getId())
-    token = interface.IERC20(tokenAddress)
+    token_address = instanceService.getComponentToken(riskpool.getId())
+    token = interface.IERC20Metadata(token_address)
 
+    # amount to stake in riskpool/bundle
+    bundle_funding = 10 ** 6
+    bundle_funding_amount = to_token_amount(token, bundle_funding)
+
+    # check initialized riskpool
+    assert instanceService.bundles() == 0
+    assert token.balanceOf(instanceWallet) == 0
+    assert token.balanceOf(riskpoolWallet) == 0
+    assert token.balanceOf(investor) == 0
+    assert token.balanceOf(instanceOperator) >= bundle_funding_amount
+
+    # create riskpool / bundle setup
     bundle_id = create_bundle(
         instance, 
         instanceOperator, 
+        riskpool, 
         investor, 
-        riskpool)
+        bundle_funding=bundle_funding)
 
     riskpoolBalanceBefore = instanceService.getBalance(riskpool.getId())
     instanceBalanceBefore = token.balanceOf(instanceWallet)
 
+    # create policy
     object_name = "My House"
-    sum_insured = 100000
-    process_id = apply_for_policy(
-        object_name,
-        instance,
-        instanceOperator,
-        product,
-        customer,
-        sum_insured)
+    object_value = 10 ** 5
+    sum_insured_amount = to_token_amount(token, object_value)
+
+    process_id = create_policy(
+        instance, 
+        instanceOperator, 
+        product, 
+        customer, 
+        object_name=object_name,
+        object_value=object_value)
 
     tx = history[-1]
     assert 'LogFirePolicyCreated' in tx.events
     assert tx.events['LogFirePolicyCreated']['processId'] == process_id
     assert tx.events['LogFirePolicyCreated']['policyHolder'] == customer
-    assert tx.events['LogFirePolicyCreated']['sumInsured'] == sum_insured
+    assert tx.events['LogFirePolicyCreated']['sumInsured'] == sum_insured_amount
     assert tx.events['LogFirePolicyCreated']['objectName'] == object_name
 
     metadata = instanceService.getMetadata(process_id).dict()
@@ -83,7 +100,7 @@ def test_create_application(
     assert metadata['productId'] == product.getId()
 
     # check application
-    assert application['sumInsuredAmount'] == sum_insured
+    assert application['sumInsuredAmount'] == sum_insured_amount
     premium = application['premiumAmount']
 
     riskpoolBalanceAfter = instanceService.getBalance(riskpool.getId())
@@ -94,7 +111,7 @@ def test_create_application(
     assert policy['premiumPaidAmount'] == premium
     assert policy['claimsCount'] == 0
     assert policy['openClaimsCount'] == 0
-    assert policy['payoutMaxAmount'] == sum_insured
+    assert policy['payoutMaxAmount'] == sum_insured_amount
     assert policy['payoutAmount'] == 0
 
     # check wallet balances
@@ -115,22 +132,30 @@ def test_application_with_locked_bundle(
     product,
     riskpool,
 ):
+    token_address = instanceService.getComponentToken(riskpool.getId())
+    token = interface.IERC20Metadata(token_address)
+    bundle_funding = 10 ** 6
+    bundle_funding_amount = to_token_amount(token, bundle_funding)
+
+    # create riskpool / bundle setup
     bundle_id = create_bundle(
         instance, 
         instanceOperator, 
+        riskpool, 
         investor, 
-        riskpool)
+        bundle_funding=bundle_funding)
 
     riskpool.lockBundle(bundle_id, {'from':investor})
 
-    object_name = 'My 1st House'
-    sum_insured = 100000
+    object_name = "My House"
+    object_value = 10 ** 5
+    sum_insured_amount = to_token_amount(token, object_value)
 
     with brownie.reverts('ERROR:BRP-001:NO_ACTIVE_BUNDLES'):
-        apply_for_policy(
-            object_name,
-            instance,
-            instanceOperator,
-            product,
-            customer,
-            sum_insured)
+        create_policy(
+            instance, 
+            instanceOperator, 
+            product, 
+            customer, 
+            object_name=object_name,
+            object_value=object_value)

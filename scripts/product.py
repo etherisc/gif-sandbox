@@ -6,13 +6,12 @@ from brownie import (
     interface,
     Wei,
     Contract, 
-    FireProduct,
-    FireOracle,
-    FireRiskpool,
 )
-
 from scripts.util import s2b
 from scripts.instance import GifInstance
+
+# product contract names
+NAME_DEFAULT = 'Protection'
 
 # fees
 
@@ -36,7 +35,7 @@ class GifOracle(object):
         oracleContractClass,
         oracleProvider: Account, 
         name,
-        publishSource=False
+        publish_source
     ):
         instanceService = instance.getInstanceService()
         instanceOperatorService = instance.getInstanceOperatorService()
@@ -60,7 +59,7 @@ class GifOracle(object):
             s2b(name),
             instance.getRegistry(),
             {'from': oracleProvider},
-            publish_source=publishSource)
+            publish_source=publish_source)
         
         print('3) oracle {} proposing to instance by oracle provider {}'.format(
             self.oracle, oracleProvider))
@@ -94,11 +93,11 @@ class GifRiskpool(object):
         riskpoolWallet: Account,
         investor: Account,
         collateralization:int,
+        publish_source,
         sumOfSumInsuredCap=SUM_OF_SUM_INSURED_CAP_DEFAULT,
         maxActiveBundles=MAX_ACTIVE_RISKPOOL_BUNDLES_DEFAULT,
         fixedFee=CAPITAL_FEE_FIXED_DEFAULT,
-        fractionalFee=CAPITAL_FEE_FRACTIONAL_DEFAULT,
-        publishSource=False
+        fractionalFee=CAPITAL_FEE_FRACTIONAL_DEFAULT
     ):
         instanceService = instance.getInstanceService()
         instanceOperatorService = instance.getInstanceOperatorService()
@@ -125,7 +124,7 @@ class GifRiskpool(object):
             riskpoolWallet,
             instance.getRegistry(),
             {'from': riskpoolKeeper},
-            publish_source=publishSource)
+            publish_source=publish_source)
         
         print('3) riskpool {} proposing to instance by riskpool keeper {}'.format(
             self.riskpool, riskpoolKeeper))
@@ -191,9 +190,9 @@ class GifProduct(object):
         erc20Token: Account,
         oracle: GifOracle,
         riskpool: GifRiskpool,
+        publish_source,
         fixedFee=PREMIUM_FEE_FIXED_DEFAULT,
         fractionalFee=PREMIUM_FEE_FRACTIONAL_DEFAULT,
-        publishSource=False
     ):
         self.oracle = oracle
         self.riskpool = riskpool
@@ -215,8 +214,8 @@ class GifProduct(object):
             productOwner, 
             {'from': instance.getOwner()})
 
-        print('2) deploy product by product owner {}'.format(
-            productOwner))
+        print('2) deploy product {} by product owner {}'.format(
+            name, productOwner))
         
         self.product = productContractClass.deploy(
             s2b(name),
@@ -225,7 +224,7 @@ class GifProduct(object):
             riskpool.getId(),
             registry,
             {'from': productOwner},
-            publish_source=publishSource)
+            publish_source=publish_source)
 
         print('3) product {} proposing to instance by product owner {}'.format(
             self.product, productOwner))
@@ -296,8 +295,8 @@ class GifProductComplete(object):
         riskpoolWallet: Account,
         investor: Account,
         erc20Token: Account,
-        baseName='Fire' + str(int(time.time())),  # FIXME
-        publishSource=False
+        name=NAME_DEFAULT,  
+        publish_source=False
     ):
         instanceService = instance.getInstanceService()
         instanceOperatorService = instance.getInstanceOperatorService()
@@ -305,13 +304,14 @@ class GifProductComplete(object):
         registry = instance.getRegistry()
 
         self.token = erc20Token
+        baseName = '{}_{}'.format(name, str(int(time.time()))) # FIXME
 
         self.oracle = GifOracle(
             instance,
             oracleContractClass,
             oracleProvider, 
             '{}_Oracle'.format(baseName),
-            publishSource)
+            publish_source)
 
         self.riskpool = GifRiskpool(
             instance, 
@@ -322,7 +322,7 @@ class GifProductComplete(object):
             riskpoolWallet, 
             investor, 
             instanceService.getFullCollateralizationLevel(),
-            publishSource)
+            publish_source)
 
         self.product = GifProduct(
             instance,
@@ -332,7 +332,7 @@ class GifProductComplete(object):
             erc20Token, 
             self.oracle,
             self.riskpool,
-            publishSource)
+            publish_source)
 
     def getToken(self):
         return self.token

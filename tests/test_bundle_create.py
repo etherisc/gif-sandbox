@@ -8,12 +8,13 @@ from brownie import (
 
 from scripts.util import b2s
 
-from scripts.product_fire import (
-    GifFireProduct,
-    GifFireRiskpool,
+from scripts.product import (
+    GifProduct,
+    GifRiskpool,
 )
 
-from scripts.setup import create_bundle
+from scripts.deploy_product import to_token_amount
+from scripts.deploy_fire import create_bundle
 
 # enforce function isolation for tests below
 @pytest.fixture(autouse=True)
@@ -30,9 +31,10 @@ def test_create_bundle_happy_case(
     instanceWallet = instanceService.getInstanceWallet()
     riskpoolWallet = instanceService.getRiskpoolWallet(riskpool.getId())
     tokenAddress = instanceService.getComponentToken(riskpool.getId())
-    token = interface.IERC20(tokenAddress)
+    token = interface.IERC20Metadata(tokenAddress)
 
     bundle_funding = 100000
+    bundle_funding_amount = to_token_amount(token, bundle_funding)
 
     # check initialized riskpool
     assert instanceService.bundles() == 0
@@ -44,15 +46,15 @@ def test_create_bundle_happy_case(
     bundleId = create_bundle(
         instance, 
         instanceOperator, 
-        investor, 
         riskpool, 
-        bundle_funding)
+        investor, 
+        bundle_funding=bundle_funding)
 
     # check wallet balances against bundle investment
     fixedFee = 0
     fractionalFee = 0
-    capital_fees = fractionalFee * bundle_funding + fixedFee
-    net_capital = bundle_funding - capital_fees
+    capital_fees = fractionalFee * bundle_funding_amount + fixedFee
+    net_capital = bundle_funding_amount - capital_fees
 
     assert instanceService.bundles() == 1
     assert token.balanceOf(riskpoolWallet) == net_capital

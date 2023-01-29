@@ -73,6 +73,3 @@ def encode_function_data(*args, initializer=None):
     if initializer: return initializer.encode_input(*args)
 
     return b''
-
-def contract_from_address(contractClass, contractAddress):
-    return Contract.from_abi(contractClass._name, contractAddress, contractClass.abi)

@@ -7,10 +7,10 @@ from brownie import (
 )
 
 from scripts.util import b2s
-from scripts.product_fire import (
-    GifFireProduct,
-    GifFireOracle,
-    GifFireRiskpool,
+from scripts.product import (
+    GifProduct,
+    GifOracle,
+    GifRiskpool,
 )
 
 # enforce function isolation for tests below
@@ -19,23 +19,23 @@ def isolation(fn_isolation):
     pass
 
 def test_print_fixture_objects(
-    gifFireProduct: GifFireProduct,
+    gifProduct: GifProduct,
     riskpoolWallet: Account,
-    usdc: Usdc,
+    token: Usdc,
 ):
-    gifFireOracle = gifFireProduct.getOracle()
-    gifFireRiskpool = gifFireProduct.getRiskpool()
+    gifOracle = gifProduct.getOracle()
+    gifRiskpool = gifProduct.getRiskpool()
 
-    print('gifDepegProduct {}'.format(gifFireProduct))
-    print('gifDepegOracle {}'.format(gifFireOracle))
-    print('gifDepegRiskpool {}'.format(gifFireRiskpool))
+    print('gifProduct {}'.format(gifProduct))
+    print('gifOracle {}'.format(gifOracle))
+    print('gifRiskpool {}'.format(gifRiskpool))
     print('riskpoolWallet {}'.format(riskpoolWallet))
-    print('getToken() {}'.format(gifFireProduct.getToken()))
-    print('usdc {}'.format(usdc))
+    print('getToken() {}'.format(gifProduct.getToken()))
+    print('token {}'.format(token))
 
-    product = gifFireProduct.getContract()
-    oracle = gifFireOracle.getContract()
-    riskpool = gifFireRiskpool.getContract()
+    product = gifProduct.getContract()
+    oracle = gifOracle.getContract()
+    riskpool = gifRiskpool.getContract()
 
     print('product {} id {} name {}'.format(
         product,
@@ -55,6 +55,8 @@ def test_print_fixture_objects(
         b2s(riskpool.getName())
     ))
 
+    assert True
+
 
 def test_product_deploy(
     instanceService,
@@ -66,7 +68,7 @@ def test_product_deploy(
     oracle,
     riskpool,
     riskpoolWallet: Account,
-    usdc: Usdc
+    token
 ):
     # check role assignements
     poRole = instanceService.getProductOwnerRole()
@@ -90,9 +92,9 @@ def test_product_deploy(
     # TODO check fee specification once this is available from instanceService
 
     # check product
-    assert product.getToken() == usdc
+    assert product.getToken() == token
     assert product.getRiskpoolId() == riskpool.getId()
 
     # check riskpool
     assert riskpool.getWallet() == riskpoolWallet
-    assert riskpool.getErc20Token() == usdc
+    assert riskpool.getErc20Token() == token

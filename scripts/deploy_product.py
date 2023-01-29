@@ -6,18 +6,10 @@ from brownie import (
     network,
     web3,
     Usdc,
-    FireProduct,
-    FireOracle,
-    FireRiskpool
 )
 
 from scripts.product import GifProductComplete
 from scripts.instance import GifInstance
-
-from scripts.setup import (
-    create_bundle,
-    apply_for_policy
-)
 
 from scripts.util import (
     contract_from_address,
@@ -28,14 +20,6 @@ from os.path import exists
 
 # allowance for claim payouts or staking withdrawals
 RISKPOOL_WALLET_ALLOWANCE = 10 ** 32
-
-CONTRACT_CLASS_TOKEN = Usdc
-CONTRACT_CLASS_PRODUCT = FireProduct
-CONTRACT_CLASS_ORACLE = FireOracle
-CONTRACT_CLASS_RISKPOOL = FireRiskpool
-
-# product specific constants
-OBJECT_NAME = 'My Home'
 
 # instance specific constants
 REGISTRY_OWNER = 'registryOwner'
@@ -62,8 +46,12 @@ RISKPOOL = 'riskpool'
 PROCESS_ID1 = 'processId1'
 PROCESS_ID2 = 'processId2'
 
+CHAIN_ID_MUMBAI = 80001
+CHAIN_IDS_WITH_GAS_PRICE = [CHAIN_ID_MUMBAI]
+
 # GAS_PRICE = web3.eth.gas_price
-GAS_PRICE = 25000000
+# mumbai price estimate
+GAS_PRICE = 1600000000
 GAS_PRICE_SAFETY_FACTOR = 1.25
 
 GAS_S = 2000000
@@ -78,6 +66,8 @@ REQUIRED_FUNDS = {
     INSTANCE_OPERATOR: REQUIRED_FUNDS_L,
     INSTANCE_WALLET:   REQUIRED_FUNDS_S,
     PRODUCT_OWNER:     REQUIRED_FUNDS_M,
+    INSURER:           REQUIRED_FUNDS_S,
+    ORACLE_PROVIDER:   REQUIRED_FUNDS_M,
     RISKPOOL_KEEPER:   REQUIRED_FUNDS_M,
     RISKPOOL_WALLET:   REQUIRED_FUNDS_S,
     INVESTOR:          REQUIRED_FUNDS_S,
@@ -87,6 +77,7 @@ REQUIRED_FUNDS = {
 
 
 def verify_deploy_base(
+    from_component,
     stakeholder_accounts, 
     erc20_token,
     product
@@ -114,9 +105,9 @@ def verify_deploy_base(
         riskpool
     ) = from_component(
         product.address, 
-        productId=product_id,
-        oracleId=oracle_id,
-        riskpoolId=riskpool_id
+        product_id=product_id,
+        oracle_id=oracle_id,
+        riskpool_id=riskpool_id
     )
 
     instanceService = instance.getInstanceService()
@@ -260,8 +251,9 @@ def amend_funds(stakeholders_accounts):
 
 
 def _print_constants():
+    gas_price = get_gas_price()
     print('chain id: {}'.format(web3.eth.chain_id))
-    print('gas price [Mwei]: {}'.format(GAS_PRICE/10**6))
+    print('gas price [Mwei]: {}'.format(gas_price/10**6))
     print('gas price safety factor: {}'.format(GAS_PRICE_SAFETY_FACTOR))
 
     print('gas S: {}'.format(GAS_S))
@@ -271,6 +263,13 @@ def _print_constants():
     print('required S [ETH]: {}'.format(REQUIRED_FUNDS_S / 10**18))
     print('required M [ETH]: {}'.format(REQUIRED_FUNDS_M / 10**18))
     print('required L [ETH]: {}'.format(REQUIRED_FUNDS_L / 10**18))
+
+
+def get_gas_price() -> int:
+    if web3.chain_id in CHAIN_IDS_WITH_GAS_PRICE:
+        return web3.eth.gas_price
+    
+    return GAS_PRICE
 
 
 def _get_balances(stakeholders_accounts):
@@ -359,6 +358,7 @@ def _add_product_to_deployment(
 
 
 def all_in_1_base(
+    base_name,
     tokenContractClass,
     productContractClass,
     oracleContractClass,
@@ -381,7 +381,8 @@ def all_in_1_base(
         token = tokenContractClass.deploy({'from':a[INSTANCE_OPERATOR]}, publish_source=publish_source)
         instance = GifInstance(
             instanceOperator=a[INSTANCE_OPERATOR], 
-            instanceWallet=a[INSTANCE_WALLET])
+            instanceWallet=a[INSTANCE_WALLET],
+            publish_source=publish_source)
 
     # where available reuse tokens and gif instgance from existing deployments
     else:
@@ -395,7 +396,8 @@ def all_in_1_base(
         instance = GifInstance(
             instanceOperator=a[INSTANCE_OPERATOR], 
             instanceWallet=a[INSTANCE_WALLET],
-            registryAddress=registry_address or get_address('registry'))
+            registryAddress=registry_address or get_address('registry'),
+            publish_source=publish_source)
 
     print('====== token setup ======')
     print('- token {} {}'.format(token.symbol(), token))
@@ -418,7 +420,7 @@ def all_in_1_base(
     investor = a[INVESTOR]
     customer = a[CUSTOMER1]
     
-    print('====== deploy product/oracle/riskpool ======')
+    print('====== deploy product/oracle/riskpool "{}" ======'.format(base_name))
     gifDeployment = GifProductComplete(
         instance,
         productContractClass,
@@ -430,7 +432,8 @@ def all_in_1_base(
         riskpoolWallet,
         investor,
         token,
-        publishSource=publish_source)
+        name=base_name,
+        publish_source=publish_source)
 
     # assess balances at beginning of deploy
     balances_after_deploy = _get_balances(a)
@@ -474,6 +477,7 @@ def all_in_1_base(
         deployment[RISKPOOL_WALLET],
         deployment[INVESTOR],
         deployment[ERC20_TOKEN],
+        deployment[INSTANCE],
         deployment[INSTANCE_SERVICE],
         deployment[INSTANCE_OPERATOR],
         bundle_id,
@@ -548,7 +552,6 @@ def inspect_applications(d):
         premium = application[1]
         suminsured = application[2]
         appdata = application[3]
-        (object_name) = product.decodeApplicationParameterFromData(appdata)
 
         if state == 2:
             policy = instanceService.getPolicy(processId)
@@ -558,14 +561,13 @@ def inspect_applications(d):
             policy = None
             kind = 'application'
 
-        print('{} {} {} {} {} {} "{}" {:.1f} {:.1f}'.format(
+        print('{} {} {} {} {} {} {:.1f} {:.1f}'.format(
             idx,
             _shortenAddress(customer),
             productId,
             processId,
             kind,
             state,
-            object_name,
             premium/mult_token,
             suminsured/mult_token,
         ))
@@ -581,29 +583,25 @@ def get_bundle_data(
     instanceService,
     riskpool
 ):
-    riskpoolId = riskpool.getId()
-    activeBundles = riskpool.activeBundles()
+    bundle_nft = contract_from_address(interface.IERC721, instanceService.getBundleToken())
+    active_bundles = riskpool.activeBundles()
+    bundle_data = []
 
-    bundleData = []
+    for idx in range(active_bundles):
+        bundle_id = riskpool.getActiveBundleId(idx)
+        bundle = instanceService.getBundle(bundle_id).dict()
 
-    for idx in range(activeBundles):
-        bundleId = riskpool.getActiveBundleId(idx)
-        bundle = instanceService.getBundle(bundleId)
-
-        capital = bundle[5]
-        locked = bundle[6]
-        capacity = bundle[5]-bundle[6]
-
-        bundleData.append({
+        bundle_data.append({
             'idx':idx,
-            'riskpoolId':riskpoolId,
-            'bundleId':bundleId,
-            'capital':capital,
-            'locked':locked,
-            'capacity':capacity
+            'owner':bundle_nft.ownerOf(bundle['tokenId']),
+            'riskpoolId':bundle['riskpoolId'],
+            'bundleId':bundle_id,
+            'capital':bundle['capital'],
+            'locked':bundle['lockedCapital'],
+            'capacity':bundle['capital'] - bundle['lockedCapital']
         })
 
-    return bundleData
+    return bundle_data
 
 
 def inspect_bundles(d):
@@ -615,14 +613,15 @@ def inspect_bundles(d):
     bundleData = get_bundle_data(instanceService, riskpool)
 
     # print header row
-    print('i riskpool bundle token capital locked capacity')
+    print('i owner riskpool bundle token capital locked capacity')
 
     # print individual rows
     for idx in range(len(bundleData)):
         b = bundleData[idx]
 
-        print('{} {} {} {} {:.1f} {:.1f} {:.1f}'.format(
+        print('{} {} {} {} {} {:.1f} {:.1f} {:.1f}'.format(
             b['idx'],
+            _shortenAddress(b['owner']),
             b['riskpoolId'],
             b['bundleId'],
             token.symbol(),
@@ -632,97 +631,117 @@ def inspect_bundles(d):
         ))
 
 
-def from_component(
-    componentAddress,
-    productId=0,
-    oracleId=0,
-    riskpoolId=0
+def from_component_base(
+    component_address,
+    product_contract_class,
+    oracle_contract_class,
+    riskpool_contract_class,
+    product_id,
+    oracle_id,
+    riskpool_id
 ):
-    component = contract_from_address(interface.IComponent, componentAddress)
-    return from_registry(component.getRegistry(), oracleId=oracleId, productId=productId, riskpoolId=riskpoolId)
+    component = contract_from_address(
+        interface.IComponent,
+        component_address)
+
+    return from_registry_base(
+        component.getRegistry(),
+        product_contract_class,
+        oracle_contract_class,
+        riskpool_contract_class,
+        product_id=product_id,
+        oracle_id=oracle_id,
+        riskpool_id=riskpool_id)
 
 
-def from_registry(
+def from_registry_base(
     registryAddress,
-    productId=0,
-    oracleId=0,
-    riskpoolId=0
+    product_contract_class,
+    oracle_contract_class,
+    riskpool_contract_class,
+    product_id=0,
+    oracle_id=0,
+    riskpool_id=0
 ):
     instance = GifInstance(registryAddress=registryAddress)
-    instanceService = instance.getInstanceService()
+    instance_service = instance.getInstanceService()
 
-    products = instanceService.products()
-    oracles = instanceService.oracles()
-    riskpools = instanceService.riskpools()
+    products = instance_service.products()
+    oracles = instance_service.oracles()
+    riskpools = instance_service.riskpools()
 
     product = None
     oracle = None
     riskpool = None
 
     if products >= 1:
-        if productId > 0:
-            componentId = productId
+        if product_id > 0:
+            component_id = product_id
         else:
-            componentId = instanceService.getProductId(products-1)
+            component_id = instance_service.getProductId(products-1)
 
             if products > 1:
                 print('1 product expected, {} products available'.format(products))
                 print('returning last product available')
         
-        componentAddress = instanceService.getComponent(componentId)
-        product = contract_from_address(CONTRACT_CLASS_PRODUCT, componentAddress)
+        component_address = instance_service.getComponent(component_id)
+        product = contract_from_address(product_contract_class, component_address)
 
         if product.getType() != 1:
             product = None
-            print('component (type={}) with id {} is not product'.format(product.getType(), componentId))
+            print('component (type={}) with id {} is not product'.format(product.getType(), component_id))
             print('no product returned (None)')
     else:
         print('1 product expected, no product available')
         print('no product returned (None)')
 
     if oracles >= 1:
-        if oracleId > 0:
-            componentId = oracleId
+        if oracle_id > 0:
+            component_id = oracle_id
         else:
-            componentId = instanceService.getOracleId(oracles-1)
+            component_id = instance_service.getOracleId(oracles-1)
 
             if oracles > 1:
                 print('1 oracle expected, {} oraclea available'.format(oracles))
                 print('returning last oracle available')
         
-        componentAddress = instanceService.getComponent(componentId)
-        oracle = contract_from_address(CONTRACT_CLASS_ORACLE, componentAddress)
+        component_address = instance_service.getComponent(component_id)
+        oracle = contract_from_address(oracle_contract_class, component_address)
 
         if oracle.getType() != 0:
             oracle = None
-            print('component (type={}) with id {} is not oracle'.format(oracle.getType(), componentId))
+            print('component (type={}) with id {} is not oracle'.format(oracle.getType(), component_id))
             print('no oracle returned (None)')
     else:
         print('1 oracle expected, no oracle available')
         print('no oracle returned (None)')
 
     if riskpools >= 1:
-        if riskpoolId > 0:
-            componentId = riskpoolId
+        if riskpool_id > 0:
+            component_id = riskpool_id
         else:
-            componentId = instanceService.getRiskpoolId(riskpools-1)
+            component_id = instance_service.getRiskpoolId(riskpools-1)
 
             if riskpools > 1:
                 print('1 riskpool expected, {} riskpools available'.format(riskpools))
                 print('returning last riskpool available')
         
-        componentAddress = instanceService.getComponent(componentId)
-        riskpool = contract_from_address(CONTRACT_CLASS_RISKPOOL, componentAddress)
+        component_address = instance_service.getComponent(component_id)
+        riskpool = contract_from_address(riskpool_contract_class, component_address)
 
         if riskpool.getType() != 2:
             riskpool = None
-            print('component (type={}) with id {} is not riskpool'.format(component.getType(), componentId))
+            print('component (type={}) with id {} is not riskpool'.format(component.getType(), component_id))
             print('no riskpool returned (None)')
     else:
         print('1 riskpool expected, no riskpools available')
         print('no riskpool returned (None)')
 
     return (instance, product, oracle, riskpool)
+
+
+def to_token_amount(token, amount):
+    return amount * 10 ** token.decimals()
 
 
 def _copy_map(map_in):

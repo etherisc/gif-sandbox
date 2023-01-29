@@ -37,6 +37,39 @@ ORACLE_SERVICE_NAME = 'OracleService'
 INSTANCE_OPERATOR_SERVICE_NAME = 'InstanceOperatorService'
 INSTANCE_SERVICE_NAME = 'InstanceService'
 
+# GIF ecosystem actors
+INSTANCE_OPERATOR = 'instanceOperator'
+INSTANCE_WALLET = 'instanceWallet'
+ORACLE_PROVIDER = 'oracleProvider'
+CHAINLINK_NODE_OPERATOR = 'chainlinkNodeOperator'
+RISKPOOL_KEEPER = 'riskpoolKeeper'
+RISKPOOL_WALLET = 'riskpoolWallet'
+INVESTOR = 'investor'
+PRODUCT_OWNER = 'productOwner'
+INSURER = 'insurer'
+CUSTOMER1 = 'customer1'
+CUSTOMER2 = 'customer2'
+REGISTRY_OWNER = 'registryOwner'
+STAKER = 'staker'
+OUTSIDER = 'outsider'
+
+GIF_ACTOR = {
+    INSTANCE_OPERATOR: 0,
+    INSTANCE_WALLET: 1,
+    ORACLE_PROVIDER: 2,
+    CHAINLINK_NODE_OPERATOR: 3,
+    RISKPOOL_KEEPER: 4,
+    RISKPOOL_WALLET: 5,
+    INVESTOR: 6,
+    PRODUCT_OWNER: 7,
+    INSURER: 8,
+    CUSTOMER1: 9,
+    CUSTOMER2: 10,
+    REGISTRY_OWNER: 13,
+    STAKER: 14,
+    OUTSIDER: 19,
+}
+
 # === GIF testing =========================================================== #
 
 # ZERO_ADDRESS = accounts.at('0x0000000000000000000000000000000000000000')
@@ -45,6 +78,7 @@ COMPROMISED_ADDRESS = '0x0000000000000000000000000000000000000013'
 
 # TEST account values
 ACCOUNTS_MNEMONIC = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+
 
 # TEST oracle/rikspool/product values
 PRODUCT_NAME = 'Test.Product'
