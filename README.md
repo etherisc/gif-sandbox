@@ -6,53 +6,62 @@
 
 This repository holds the smart contracts for a demo fire insurance.
 
-## Product Considerations
+## Setup Assumptions
 
+1. Developing with VS Code
+2. Working with dev containers
 
-## Risk Capital Considerations
+## TODO Fix Server to interact with contracts
 
-## Github actions
+current state does not work, not recommended to use/modify
+if this is needed short/mid term ping us on discord.
 
-Only go through the process described here if an updated GIF is required for the deployment test.
+## Interaction via Command Line
 
-### Update Ganache DB for deployment test
-
-Start a local ganache with db folder
-
-```bash
-rm -rf .github/workflows/ganache-gif/
-ganache-cli \
-    --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
-    --chain.chainId 1234 \
-    --port 7545 \
-    --accounts 20 \
-    -h "0.0.0.0" \
-    --database.dbPath .github/workflows/ganache-gif/
-```
-In new shell run the following commands
+### Running Unit Tests
 
 ```bash
-brownie networks add Local ganache-ghaction host=http://localhost:7545 chainid=1234
-cd /gif-contracts
-rm -rf build/
-brownie console --network=ganache-ghaction
+brownie test -n 8
 ```
 
-Now paste this into the brownie console
+### Deploy and Verify with Ganache
+
+```bash
+brownie console
+```
+
+In the console use the following steps.
 
 ```python
-from brownie import TestCoin
-instanceOperator = accounts[0]
-instanceWallet = accounts[1]
-usdc = TestCoin.deploy({'from': instanceOperator})
-from scripts.instance import GifInstance
-instance = GifInstance(instanceOperator, instanceWallet)
-print('registry {}\nerc20 {}'.format(
-    instance.getRegistry().address,
-    usdc.address))
+from scripts.deploy_fire import help
+help()
 ```
 
-Now shutdown above started Ganache chain (ctrl+c) and commit the new files to git. 
+The help command then shows an example session.
+```python
+from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_policy, help
 
-Also save the values for registry and erc20 in `scripts/test_deployment.py`. 
+(customer, customer2, product, oracle, riskpool, riskpoolWallet, investor, usdc, instance, instanceService, instanceOperator, bundleId, processId, d) = all_in_1(deploy_all=True)
 
+verify_deploy(d, usdc, product)
+```
+
+### Deploy to differnt Network with existing Instance
+
+As an example use the Ganache chain that runs in the background of this devcontainer setup.
+
+```bash
+brownie console --network=ganache
+```
+
+With an existing instance set parameter `deploy_all=False`.
+In this case the file `gif_instance_address.txt` needs to exist and contain the addresses of the instance registry.
+The file should be automatically created during the devconainer setup procedure of this repository.
+
+```python
+from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_policy, help
+
+(customer, customer2, product, oracle, riskpool, riskpoolWallet, investor, usdc, instance, instanceService, instanceOperator, bundleId, processId, d) = all_in_1(deploy_all=False)
+
+verify_deploy(d, usdc, product)
+```
