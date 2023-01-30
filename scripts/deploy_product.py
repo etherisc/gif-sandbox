@@ -22,17 +22,22 @@ from os.path import exists
 RISKPOOL_WALLET_ALLOWANCE = 10 ** 32
 
 # instance specific constants
-REGISTRY_OWNER = 'registryOwner'
-INSTANCE_OPERATOR = 'instanceOperator'
-INSTANCE_WALLET = 'instanceWallet'
-ORACLE_PROVIDER = 'oracleProvider'
-RISKPOOL_KEEPER = 'riskpoolKeeper'
-RISKPOOL_WALLET = 'riskpoolWallet'
-INVESTOR = 'investor'
-PRODUCT_OWNER = 'productOwner'
-INSURER = 'insurer'
-CUSTOMER1 = 'customer1'
-CUSTOMER2 = 'customer2'
+from scripts.const import (
+    INSTANCE_OPERATOR,
+    INSTANCE_WALLET,
+    ORACLE_PROVIDER,
+    CHAINLINK_NODE_OPERATOR,
+    RISKPOOL_KEEPER,
+    RISKPOOL_WALLET,
+    INVESTOR,
+    PRODUCT_OWNER,
+    INSURER,
+    CUSTOMER1,
+    CUSTOMER2,
+    REGISTRY_OWNER,
+    STAKER,
+    OUTSIDER,
+)
 
 ERC20_TOKEN = 'erc20Token'
 INSTANCE = 'instance'
