@@ -55,8 +55,6 @@ def test_print_fixture_objects(
         b2s(riskpool.getName())
     ))
 
-    assert True
-
 
 def test_product_deploy(
     instanceService,
