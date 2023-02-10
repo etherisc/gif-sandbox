@@ -130,3 +130,5 @@ dmypy.json
 
 gif_instance_address.txt
 node_modules/
+
+.DS_Store
