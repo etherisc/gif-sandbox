@@ -6,15 +6,15 @@
 
 This repository holds the smart contracts for a demo fire insurance.
 
-## Setup Assumptions
+## Setup Requirements
 
+1. A running Docker installation
 1. Developing with VS Code
-2. Working with dev containers
+1. Working with dev containers
 
-## TODO Fix Server to interact with contracts
-
-current state does not work, not recommended to use/modify
-if this is needed short/mid term ping us on discord.
+Installing Docker on Windows is sometimes a struggle.
+Recommended Approach: Follow the installation instructions for [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
+Installing Docker on Linux or Mac should be straight forward.
 
 ## Interaction via Command Line
 
