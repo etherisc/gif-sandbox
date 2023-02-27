@@ -10,7 +10,7 @@ fi
 
 # checkout gif and compile it
 echo ">>>> Checking out GIF contracts ($GIF_GIT_REVISION)..."
-git clone git@github.com:etherisc/gif-contracts.git $GIF
+git clone https://github.com/etherisc/gif-contracts.git $GIF
 cd $GIF
 git checkout $GIF_GIT_REVISION
 
