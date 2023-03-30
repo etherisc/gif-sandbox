@@ -9,6 +9,10 @@ RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/
 # install mcfly as root
 RUN curl -LSfs https://raw.githubusercontent.com/cantino/mcfly/master/ci/install.sh | sh -s -- --git cantino/mcfly 
 
+# # download required solidity compiler
+COPY .devcontainer/scripts/install_solidity.sh /tmp
+RUN /tmp/install_solidity.sh
+
 USER vscode
 
 # Shell customizations
@@ -41,10 +45,6 @@ RUN pip install eth-brownie
 
 # [Optional] Uncomment this line to install global node packages.
 RUN npm install -g ganache@7.6.0 solhint prettier prettier-plugin-solidity solhint-plugin-prettier
-
-# # download required solidity compiler
-COPY .devcontainer/scripts/install_solidity.sh /tmp
-RUN /tmp/install_solidity.sh
 
 # Download openzeppelin and chainlink depedencies (large and slow)
 ARG VERSION_OPEN_ZEPPELIN=4.7.3

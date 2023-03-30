@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 gif_instance_address.txt
+gif-contracts
 node_modules/
 
 .DS_Store
