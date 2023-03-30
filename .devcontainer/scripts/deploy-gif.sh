@@ -28,4 +28,8 @@ f.writelines("registry=%s\n" % (instance.getRegistry().address))
 f.close()
 EOF
 
+# Quickfix missing .env files
+touch /workspace/.env
+touch /home/vscode/.brownie/packages/etherisc/gif-contracts@0a64b7e/.env
+
 echo ">>>> GIF deployment completed. Registry address is saved in gif_instance_address.txt"
