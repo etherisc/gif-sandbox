@@ -29,7 +29,10 @@ f.close()
 EOF
 
 # Quickfix missing .env files
-touch /workspace/.env
-touch /home/vscode/.brownie/packages/etherisc/gif-contracts@0a64b7e/.env
+cd /workspace
+brownie pm install etherisc/gif-contracts@0a64b7e
+brownie pm install etherisc/gif-interface@a8c9822
+touch "/workspace/.env"
+touch "/home/vscode/.brownie/packages/etherisc/gif-contracts@0a64b7e/.env"
 
 echo ">>>> GIF deployment completed. Registry address is saved in gif_instance_address.txt"
