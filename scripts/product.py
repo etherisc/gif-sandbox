@@ -119,7 +119,7 @@ class GifRiskpool(object):
 
         self.riskpool = riskpoolContractClass.deploy(
             s2b(name),
-            sumOfSumInsuredCap,
+            collateralization,
             erc20Token,
             riskpoolWallet,
             instance.getRegistry(),
