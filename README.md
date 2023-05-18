@@ -20,10 +20,34 @@ Installing Docker on Linux or Mac should be straight forward.
 
 ### Running Unit Tests
 
+Before running the tests for the first time you will likely need to add an empty `.env` file before.
+
 ```bash
-brownie test -n 8
+touch /home/vscode/.brownie/packages/etherisc/gif-contracts@b58fd27/.env
 ```
 
+Now run the unit tests for the sandbox.
+```bash
+brownie test -n auto
+```
+
+This shoud result in output similar to the one provided below.
+```bash
+⬢ [Docker] ❯ brownie test -n auto
+Brownie v1.19.3 - Python development framework for Ethereum
+
+================================================================= test session starts =================================================================
+platform linux -- Python 3.9.16, pytest-6.2.5, py-1.11.0, pluggy-1.0.0
+rootdir: /workspace
+plugins: eth-brownie-1.19.3, forked-1.4.0, hypothesis-6.27.3, web3-5.31.3, xdist-1.34.0, anyio-3.6.2
+gw0 [8] / gw1 [8] / gw2 [8] / gw3 [8] / gw4 [8] / gw5 [8] / gw6 [8] / gw7 [8]
+........                                                                                                                                        [100%]
+-- Docs: https://docs.pytest.org/en/stable/warnings.html
+========================================================== 8 passed, 101 warnings in 44.52s ===========================================================
+```
+
+The important part is that all tests pass and no errors or failures are shown.
+ 
 ### Deploy and Verify with Ganache
 
 ```bash
