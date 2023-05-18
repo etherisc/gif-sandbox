@@ -20,6 +20,11 @@ Installing Docker on Linux or Mac should be straight forward.
 
 ### Running Unit Tests
 
+Start with compiling all contracts.
+```bash
+brownie compile --all
+```
+
 Before running the tests for the first time you will likely need to add an empty `.env` file before.
 
 ```bash
