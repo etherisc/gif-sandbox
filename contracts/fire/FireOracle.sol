@@ -36,9 +36,9 @@ contract FireOracle is Oracle {
     {
         // input validation
         require(
-            (fireCategory == 'S') || 
-            (fireCategory == 'M') || 
-            (fireCategory == 'L'), 
+            (fireCategory == "S") || 
+            (fireCategory == "M") || 
+            (fireCategory == "L"), 
             "fire category not in (S,M,L)");
 
         // encode oracle output (response) data and
