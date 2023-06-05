@@ -1,10 +1,10 @@
 {
-  "name": "@etherisc/depeg-contracts",
+  "name": "@etherisc/gif-sandbox",
   "version": "0.0.1",
-  "description": "Etherisc's smart contracts for a depeg insurance for stable coins.",
+  "description": "Etherisc's smart contracts for the gif sandbox",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/etherisc/depeg-contracts.git"
+    "url": "git+https://github.com/etherisc/gif-sandbox.git"
   },
   "files": [
     "contracts/**/*sol",
@@ -17,16 +17,14 @@
     "insurance",
     "blockchain",
     "ethereum",
-    "solidity",
-    "depeg"
+    "solidity"
   ],
   "license": "Apache-2.0",
   "homepage": "https://www.etherisc.com",
   "bugs": {
-    "url": "https://github.com/etherisc/depeg-contracts/issues"
+    "url": "https://github.com/etherisc/gif-sandbox/issues"
   },
   "dependencies": {
-    "@chainlink/contracts": "0.4.1",
     "@etherisc/gif-interface": "2.0.0-a8c9822",
     "@openzeppelin/contracts": "4.7.3"
   }
