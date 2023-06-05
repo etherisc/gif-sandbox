@@ -82,7 +82,7 @@ verify_deploy(d, usdc, product)
 
 This will deploy a new GIF instance as well as the fire insurance product and verify the installation. 
 
-### Deploy to a different network with a pre-existing GIF instance
+### Deploy to a different network containing a pre-installed GIF instance
 
 As an example use the Ganache chain that runs in a separate container (`ganache`) of this devcontainer setup.
 
