@@ -2,7 +2,7 @@ FROM node:lts-bullseye
 
 EXPOSE 7545
 
-RUN npm install -g ganache@7.6.0
+RUN npm install -g ganache
 RUN mkdir /ganache
 
 CMD ganache-cli \

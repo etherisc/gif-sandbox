@@ -3,7 +3,7 @@ ARG VARIANT=3-bullseye
 FROM mcr.microsoft.com/devcontainers/python:${VARIANT}
 
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
-ARG NODE_VERSION="16"
+ARG NODE_VERSION="18"
 RUN if [ "${NODE_VERSION}" != "none" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
 
 # install mcfly as root
@@ -44,7 +44,7 @@ RUN pip install "uvicorn[standard]"
 RUN pip install eth-brownie
 
 # [Optional] Uncomment this line to install global node packages.
-RUN npm install -g ganache@7.6.0 solhint prettier prettier-plugin-solidity solhint-plugin-prettier
+RUN npm install -g ganache solhint prettier prettier-plugin-solidity solhint-plugin-prettier
 
 # Download openzeppelin and chainlink depedencies (large and slow)
 ARG VERSION_OPEN_ZEPPELIN=4.7.3
