@@ -3,7 +3,7 @@ name: Error codes and events
 on: 
   workflow_dispatch:
   push:
-    branches: [ main, develop ]
+    branches: [ master ]
     tags:
     - '*'
   pull_request:
