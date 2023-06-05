@@ -14,13 +14,16 @@ This repository holds the smart contracts for a demo fire insurance.
 
 Installing Docker on Windows is sometimes a struggle.
 Recommended Approach: Follow the installation instructions for [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
-Installing Docker on Linux or Mac should be straight forward.
+Installing Docker on [Linux](https://docs.docker.com/desktop/install/linux-install/) or [Mac](https://docs.docker.com/desktop/install/mac-install/) should be straight forward.
+
+When you have installed docker, check out the code, open it in VS Code and start the dev container (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_). Once the dev container is up and running and has finished compiling the contracts, you can start working with the code.
 
 ## Interaction via Command Line
 
 ### Running Unit Tests
 
 Start with compiling all contracts.
+
 ```bash
 brownie compile --all
 ```
@@ -75,16 +78,18 @@ from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_p
 verify_deploy(d, usdc, product)
 ```
 
-### Deploy to differnt Network with existing Instance
+This will deploy a new GIF instance as well as the fire insurance product and verify the installation. 
 
-As an example use the Ganache chain that runs in the background of this devcontainer setup.
+### Deploy to a different network with a pre-existing GIF instance
+
+As an example use the Ganache chain that runs in a separate container (`ganache`) of this devcontainer setup.
 
 ```bash
 brownie console --network=ganache
 ```
 
 With an existing instance set parameter `deploy_all=False`.
-In this case the file `gif_instance_address.txt` needs to exist and contain the addresses of the instance registry.
+In this case the file `gif_instance_address.txt` needs to exist and contain the addresses of the instance registry
 The file should be automatically created during the devconainer setup procedure of this repository.
 
 ```python
