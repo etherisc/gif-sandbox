@@ -133,3 +133,5 @@ gif-contracts
 node_modules/
 
 .DS_Store
+
+tmp/

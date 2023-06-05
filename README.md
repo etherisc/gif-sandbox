@@ -16,7 +16,9 @@ Installing Docker on Windows is sometimes a struggle.
 Recommended Approach: Follow the installation instructions for [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/).
 Installing Docker on [Linux](https://docs.docker.com/desktop/install/linux-install/) or [Mac](https://docs.docker.com/desktop/install/mac-install/) should be straight forward.
 
-When you have installed docker, check out the code, open it in VS Code and start the dev container (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_). Once the dev container is up and running and has finished compiling the contracts, you can start working with the code.
+When you have installed docker, check out the code, open it in VS Code and start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_). Once the devcontainer is up and running and has finished compiling the contracts, you can start working with the code.
+
+If you cannot run the vscode devcontainer, then see below in chapter _Run brownie container outside of vscode devcontainer_ for instructions how to run the brownie container manually. When the container is started, continue with the instructions in chapter _Interaction via Command Line_.
 
 ## Interaction via Command Line
 
@@ -98,4 +100,25 @@ from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_p
 (customer, customer2, product, oracle, riskpool, riskpoolWallet, investor, usdc, instance, instanceService, instanceOperator, bundleId, processId, d) = all_in_1(deploy_all=False)
 
 verify_deploy(d, usdc, product)
+```
+
+
+## Run brownie container outside of vscode devcontainer
+
+Build the brownie container 
+
+```bash
+docker build -t gif-sandbox-brownie -f Dockerfile.brownie-container .
+```
+
+Run the brownie container
+
+```bash
+docker run -v .:/sandbox --name gif-sandbox-brownie gif-sandbox-brownie
+```
+
+Start an interactive shell in the brownie container to execute commands
+
+```bash
+docker exec -it gif-sandbox-brownie bash
 ```

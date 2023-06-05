@@ -1,0 +1,57 @@
+FROM python:3.10-bullseye
+
+EXPOSE 7545
+
+# install required dependencies
+# download required solidity compiler
+COPY .devcontainer/scripts/install_solidity.sh /tmp
+RUN /tmp/install_solidity.sh
+# upgrade pip
+RUN python -m pip install --upgrade pip
+# install brownie
+RUN pip install eth-brownie
+
+
+RUN useradd -m -s /bin/bash vscode
+RUN chown -R vscode:vscode /home/vscode
+USER vscode
+
+# install nvm, node and ganache
+RUN curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+RUN echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+RUN echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"' >> ~/.bashrc
+RUN echo '[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"' >> ~/.bashrc
+RUN . ~/.bashrc && nvm install --lts
+RUN . ~/.bashrc && npm install -g ganache
+
+# install gif dependencies
+ARG VERSION_OPEN_ZEPPELIN=4.7.3
+RUN wget -O /tmp/v${VERSION_OPEN_ZEPPELIN}.tar.gz https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v${VERSION_OPEN_ZEPPELIN}.tar.gz \
+    && mkdir -p /home/vscode/.brownie/packages/OpenZeppelin \
+    && cd /home/vscode/.brownie/packages/OpenZeppelin \
+    && tar xvfz /tmp/v${VERSION_OPEN_ZEPPELIN}.tar.gz \
+    && mv openzeppelin-contracts-${VERSION_OPEN_ZEPPELIN} openzeppelin-contracts@${VERSION_OPEN_ZEPPELIN} 
+ARG VERSION_OPEN_ZEPPELIN=4.8.2
+RUN wget -O /tmp/v${VERSION_OPEN_ZEPPELIN}.tar.gz https://github.com/OpenZeppelin/openzeppelin-contracts/archive/refs/tags/v${VERSION_OPEN_ZEPPELIN}.tar.gz \
+    && mkdir -p /home/vscode/.brownie/packages/OpenZeppelin \
+    && cd /home/vscode/.brownie/packages/OpenZeppelin \
+    && tar xvfz /tmp/v${VERSION_OPEN_ZEPPELIN}.tar.gz \
+    && mv openzeppelin-contracts-${VERSION_OPEN_ZEPPELIN} openzeppelin-contracts@${VERSION_OPEN_ZEPPELIN} 
+ARG VERSION_CHAINLINK=1.6.0
+RUN wget -O /tmp/v${VERSION_CHAINLINK}.tar.gz https://github.com/smartcontractkit/chainlink/archive/refs/tags/v${VERSION_CHAINLINK}.tar.gz \
+    && mkdir -p /home/vscode/.brownie/packages/smartcontractkit \
+    && cd /home/vscode/.brownie/packages/smartcontractkit \
+    && tar xvfz /tmp/v${VERSION_CHAINLINK}.tar.gz \
+    && mv chainlink-${VERSION_CHAINLINK} chainlink@${VERSION_CHAINLINK}
+ARG VERSION_CHAINLINK=1.10.0
+RUN wget -O /tmp/v${VERSION_CHAINLINK}.tar.gz https://github.com/smartcontractkit/chainlink/archive/refs/tags/v${VERSION_CHAINLINK}.tar.gz \
+    && mkdir -p /home/vscode/.brownie/packages/smartcontractkit \
+    && cd /home/vscode/.brownie/packages/smartcontractkit \
+    && tar xvfz /tmp/v${VERSION_CHAINLINK}.tar.gz \
+    && mv chainlink-${VERSION_CHAINLINK} chainlink@${VERSION_CHAINLINK}
+
+
+VOLUME /sandbox
+WORKDIR /sandbox
+
+ENTRYPOINT ["sleep", "infinity"]
