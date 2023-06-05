@@ -102,6 +102,23 @@ from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_p
 verify_deploy(d, usdc, product)
 ```
 
+### Interacting with the fire insurance product
+
+
+```python
+# Create a new policy for a house with a value of 1 million USD.
+policy = product.applyForPolicy('The big house', 1000000 * 10 ** 6, {'from': accounts[9]})
+
+# Retrieve the `processId` of the new policy
+processId = policy.events['LogApplicationCreated'][0]['processId']
+
+# Fetch the state of the applicaton (if [state == 2](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L58) -> policy is underwritten)
+instanceService.getApplication(processId).dict()
+
+# Fetch the state of the policy (if [state == 0](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L59) -> policy is active)
+instanceService.getPolicy(processId).dict()
+```
+
 
 ## Run brownie container outside of vscode devcontainer
 
