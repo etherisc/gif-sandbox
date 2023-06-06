@@ -180,7 +180,7 @@ struct Application {
 */
 
         IPolicy.Application memory applicationData = _getApplication(policyId);
-        uint256 premium = applicationData.premiumAmount;
+        uint256 sumInsured = applicationData.sumInsuredAmount;
         string memory objectName = decodeApplicationParameterFromData(
             applicationData.data
         );
@@ -193,7 +193,7 @@ struct Application {
         bytes1 fireCategory = abi.decode(response, (bytes1));
 
         // Claim handling based on reponse to greeting provided by oracle
-        _handleClaim(policyId, policyHolder, premium, fireCategory);
+        _handleClaim(policyId, policyHolder, sumInsured, fireCategory);
     }
 
     function getOracleId() external view returns (uint256 oracleId) {
@@ -203,10 +203,10 @@ struct Application {
     function _handleClaim(
         bytes32 policyId,
         address payable policyHolder,
-        uint256 premium,
+        uint256 sumInsured,
         bytes1 fireCategory
     ) internal {
-        uint256 payoutAmount = _calculatePayoutAmount(premium, fireCategory);
+        uint256 payoutAmount = _calculatePayoutAmount(sumInsured, fireCategory);
 
         // no claims handling for payouts == 0
         if (payoutAmount > 0) {
@@ -229,13 +229,13 @@ struct Application {
     }
 
     function _calculatePayoutAmount(
-        uint256 premium,
+        uint256 sumInsured,
         bytes1 fireCategory
     ) internal pure returns (uint256 payoutAmount) {
         if (fireCategory == "M") {
-            payoutAmount = PAYOUT_FACTOR_MEDIUM * premium;
+            payoutAmount = (PAYOUT_FACTOR_MEDIUM * sumInsured)  / 100;
         } else if (fireCategory == "L") {
-            payoutAmount = PAYOUT_FACTOR_LARGE * premium;
+            payoutAmount = (PAYOUT_FACTOR_LARGE * sumInsured) / 100;
         } else {
             // small fires considered below deductible, no payout
             payoutAmount = 0;

@@ -108,11 +108,11 @@ verify_deploy(d, usdc, product)
 ```python
 from scripts.util import s2h
 
-# fund customer wallet
-usdc.transfer(customer, 10000000 * 10 ** 6, {'from': instanceOperator})
-usdc.approve(instanceService.getTreasuryAddress(), 10000000 * 10 ** 6, {'from': customer})
+# fund customer wallet and approve treasry with a large amount for simplicity
+usdc.transfer(customer, 100000 * 10 ** 6, {'from': instanceOperator})
+usdc.approve(instanceService.getTreasuryAddress(), 100000 * 10 ** 6, {'from': customer})
 
-# Create a new policy for a house with a value of 1 million USD.
+# Create a new policy for a house with a value of 10'000 USDC.
 policy = product.applyForPolicy('My house', 10000 * 10 ** 6, {'from': customer})
 
 # Retrieve the `processId` of the new policy
@@ -121,12 +121,15 @@ processId = policy.events['LogApplicationCreated'][0]['processId']
 # Fetch the state of the applicaton (if [state == 2](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L58) -> policy is underwritten)
 instanceService.getApplication(processId).dict()
 
-# Fetch the state of the policy (if [state == 0](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L59) -> policy is active)
+# Fetch the state of the policy (if [state == 0](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L59) -> policy is active, also make sure the premiumPaidAmount is > 0 ... if not probably the allowance was not set correctly)
 instanceService.getPolicy(processId).dict()
 
-# Retrieve the requestId (created during the underwriting process) of the policy and send oracle response with fire category `S` 
+# Retrieve the requestId (created during the underwriting process) of the policy and send oracle response with fire category `M` (5% payback) or use `L` for large fire with 100% payback
 requestId = oracle.requestId('My house')
-claim_tx = oracle.respond(requestId, s2h('M'))
+oracle_tx = oracle.respond(requestId, s2h('M'))
+
+# the log list should contain a entry `LogFirePayoutExecuted` with the amount of USDC 2500
+oracle_tx.events
 ```
 
 
