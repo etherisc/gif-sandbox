@@ -29,7 +29,6 @@ f.writelines("oracle=%s\n" % (oracle.address))
 f.writelines("oracleId=%s\n" % (oracle.getId()))
 f.writelines("usdc=%s\n" % (usdc.address))
 f.writelines("customer=%s\n" % (customer.address))
-f.writelines("instance=%s\n" % (instance.address))
 f.writelines("instanceService=%s\n" % (instanceService.address))
 f.close()
 EOF
