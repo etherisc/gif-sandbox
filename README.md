@@ -104,6 +104,7 @@ verify_deploy(d, usdc, product)
 
 ### Interacting with the fire insurance product
 
+#### Creating a new policy
 
 ```python
 from scripts.util import s2h
@@ -123,13 +124,24 @@ instanceService.getApplication(processId).dict()
 
 # Fetch the state of the policy (if [state == 0](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L59) -> policy is active, also make sure the premiumPaidAmount is > 0 ... if not probably the allowance was not set correctly)
 instanceService.getPolicy(processId).dict()
+```
 
+#### Sending a message through the oracle to trigger a new claim and payout
+
+```python
 # Retrieve the requestId (created during the underwriting process) of the policy and send oracle response with fire category `M` (5% payback) or use `L` for large fire with 100% payback
 requestId = oracle.requestId('My house')
 oracle_tx = oracle.respond(requestId, s2h('M'))
 
 # the log list should contain a entry `LogFirePayoutExecuted` with the amount of USDC 2500
 oracle_tx.events
+```
+
+#### Expiring a policy
+
+```python
+# this will expire the policy - any claims following after expiration will be rejected due to the policy being expired
+product.expirePolicy(processId)
 ```
 
 
