@@ -1,4 +1,8 @@
 = GIF Sandbox
 
-To be documented
+The GIF sandbox actx as an example to show how to setup and use the GIF framework with an example fire insurance product. 
 
+If contains the sections
+
+* xref:setup.adoc[Setup]
+* xref:fireproduct.adoc[Fire insurance product]

@@ -14,7 +14,7 @@ contract FireProduct is Product {
     uint256 public constant OBJECT_VALUE_DIVISOR = 20;
 
     // payout specs
-    uint256 public constant PAYOUT_FACTOR_MEDIUM = 5;
+    uint256 public constant PAYOUT_FACTOR_MEDIUM = 20;
     uint256 public constant PAYOUT_FACTOR_LARGE = 100;
 
     string public constant CALLBACK_METHOD_NAME = "oracleCallback";

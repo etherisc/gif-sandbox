@@ -1,2 +1,4 @@
 * xref:index.adoc[Overview]
+* xref:setup.adoc[Setup of the development environment]
+* xref:fireproduct.adoc[Fire insurance demo]
 
