@@ -1,4 +1,6 @@
-= Prerequisites
+= Setup of the development environment
+
+== Prerequisites
 
 . A running Docker instance (or other compatible container engine) 
 . Visual Studio Code (VS Code) with the https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack[Remote Development Extension Pack] installed
@@ -7,6 +9,8 @@
 Installing Docker on Windows is sometimes a struggle.
 Recommended Approach: Follow the installation instructions for https://docs.docker.com/desktop/install/windows-install/[Docker Desktop].
 Installing Docker on https://docs.docker.com/desktop/install/linux-install/[Linux] or https://docs.docker.com/desktop/install/mac-install/[Mac] should be straight forward.
+
+== Start the sandbox
 
 When you have the container engine up and running, check out the code of the sandbox, open it in VS Code and start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_). Once the devcontainer is up and running and has finished compiling the contracts, you can start working with the code.
 **Alternatively you can also use Gihub Codespaces to work with the sandbox.**
