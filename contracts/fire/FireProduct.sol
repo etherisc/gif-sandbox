@@ -216,6 +216,7 @@ struct Application {
             emit LogFireClaimConfirmed(policyId, claimId, payoutAmount);
 
             uint256 payoutId = _newPayout(policyId, claimId, payoutAmount, "");
+            emit LogFireClaimConfirmed(policyId, claimId, payoutAmount);
             _processPayout(policyId, payoutId);
 
             emit LogFirePayoutExecuted(

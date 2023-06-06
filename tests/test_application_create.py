@@ -37,7 +37,8 @@ def test_create_application(
     investor,
     customer,
     product,
-    riskpool
+    riskpool,
+    oracle,
 ):
     instanceWallet = instanceService.getInstanceWallet()
     riskpoolWallet = instanceService.getRiskpoolWallet(riskpool.getId())
@@ -121,6 +122,8 @@ def test_create_application(
     # check instance wallet balance
     fee = riskpoolBalanceBefore + premium - riskpoolBalanceAfter
     assert instanceBalanceAfter == instanceBalanceBefore + fee
+
+    # assert oracle.requestId(object_name) != 0
 
 
 def test_application_with_locked_bundle(

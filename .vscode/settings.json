@@ -1,0 +1,17 @@
+{
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "terminal.integrated.defaultProfile.linux": "zsh",
+    "solidity.remappingsUnix": [
+        "@openzeppelin/=/home/vscode/.brownie/packages/OpenZeppelin/openzeppelin-contracts@4.8.2",
+        "@chainlink/=/home/vscode/.brownie/packages/smartcontractkit/chainlink@1.10.0",
+        "@etherisc/gif-interface/=/home/vscode/.brownie/packages/etherisc/gif-interface@3b0002a",
+        "@etherisc/gif-contracts/=/home/vscode/.brownie/packages/etherisc/gif-contracts@b58fd27",
+    ],
+    "solidity.compileUsingRemoteVersion": "v0.8.2+commit.661d1103",
+    "solidity.defaultCompiler": "localFile",
+}

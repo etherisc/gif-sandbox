@@ -106,8 +106,14 @@ verify_deploy(d, usdc, product)
 
 
 ```python
+from scripts.util import s2h
+
+# fund customer wallet
+usdc.transfer(customer, 10000000 * 10 ** 6, {'from': instanceOperator})
+usdc.approve(instanceService.getTreasuryAddress(), 10000000 * 10 ** 6, {'from': customer})
+
 # Create a new policy for a house with a value of 1 million USD.
-policy = product.applyForPolicy('The big house', 1000000 * 10 ** 6, {'from': accounts[9]})
+policy = product.applyForPolicy('My house', 10000 * 10 ** 6, {'from': customer})
 
 # Retrieve the `processId` of the new policy
 processId = policy.events['LogApplicationCreated'][0]['processId']
@@ -117,6 +123,10 @@ instanceService.getApplication(processId).dict()
 
 # Fetch the state of the policy (if [state == 0](https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L59) -> policy is active)
 instanceService.getPolicy(processId).dict()
+
+# Retrieve the requestId (created during the underwriting process) of the policy and send oracle response with fire category `S` 
+requestId = oracle.requestId('My house')
+claim_tx = oracle.respond(requestId, s2h('M'))
 ```
 
 

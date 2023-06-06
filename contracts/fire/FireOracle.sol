@@ -10,6 +10,8 @@ contract FireOracle is Oracle {
         string objectName
     );
 
+    mapping(string /* objectName */ => uint256) private _requestIds;
+
     constructor(
         bytes32 oracleName,
         address registry
@@ -24,7 +26,12 @@ contract FireOracle is Oracle {
     {
         // decode oracle input data
         (string memory objectName) = abi.decode(input, (string));
+        _requestIds[objectName] = requestId;
         emit LogFireOracleRequest(requestId, objectName);
+    }
+
+    function requestId(string calldata objectName) external view returns (uint256) {
+        return _requestIds[objectName];
     }
 
     function cancel(uint256 requestId) external override {
