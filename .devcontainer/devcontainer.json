@@ -31,6 +31,7 @@
 		"2gua.rainbow-brackets",
 		"johnpapa.vscode-peacock",
 		"vikas.code-navigation",
+		"asciidoctor.asciidoctor-vscode",
 	],
 	
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

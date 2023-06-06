@@ -18,6 +18,12 @@ echo ">>>> Compiling GIF contracts..."
 brownie compile --all
 echo "" > .env
 
+if grep -q "registry=" "/workspace/gif_instance_address.txt"; then
+    echo ">>>> gif_instance_address.txt exists. No GIF deployment"
+    exit 0
+fi
+
+
 # deploy gif and save registry address
 echo "Deploying GIF contracts to ganache ..."
 brownie console --network=ganache <<EOF
@@ -27,12 +33,5 @@ f = open("/workspace/gif_instance_address.txt", "w")
 f.writelines("registry=%s\n" % (instance.getRegistry().address))
 f.close()
 EOF
-
-# Quickfix missing .env files
-cd /workspace
-brownie pm install etherisc/gif-contracts@0a64b7e
-brownie pm install etherisc/gif-interface@a8c9822
-touch "/workspace/.env"
-touch "/home/vscode/.brownie/packages/etherisc/gif-contracts@0a64b7e/.env"
 
 echo ">>>> GIF deployment completed. Registry address is saved in gif_instance_address.txt"

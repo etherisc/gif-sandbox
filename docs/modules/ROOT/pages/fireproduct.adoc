@@ -144,3 +144,13 @@ oracle_tx.events
 # this will expire the policy - any claims following after expiration will be rejected due to the policy being expired
 product.expirePolicy(processId)
 ----
+
+== Reset devcontainer 
+
+To completely reset a devcontainer instance follow these steps
+
+. Shutdown and remove the devcontainer and associated containers
+. Remove the `ganache-db` volume from the devcontainers ganache instance
+. Delete the file `gif_instance_address.txt` from the project sources
+. Restart the devcontainer as described above in the section `Start devcontainer`
+
