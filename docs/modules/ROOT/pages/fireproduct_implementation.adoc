@@ -75,7 +75,13 @@ This function can only be called by the oracle.
 
 == FireRiskpool (`contracts/fire/FireRiskpool.sol`)
 
-TBD
+The `FireRiskpool` contract inherits from the GIF `BasicRiskpool` contract. 
+The `BasicRiskpool` always collateralizes one application using exactly one bundle. 
+
+The riskpool must provide (next to some other parameters) the collateralization level, the collateral token and the cap for the total sum insured of the riskpool. 
+
+It must also implement the `bundleMatchesApplication` method which provides the logic to match an application with a bundle. 
+In the case of the fire insurance product this matching is very simple and the product will allow for any bundle and application combination for simplicty.
 
 == FireOracle (`contracts/fire/FireOracle.sol`)
 
