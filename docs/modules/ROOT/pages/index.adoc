@@ -6,4 +6,4 @@ If contains the sections
 
 * xref:setup.adoc[Setup]
 * xref:fireproduct.adoc[Fire insurance product]
-* xref:fireproduct_implementation.adoc[Fire insurance implenentation details]
+* xref:fireproduct_implementation.adoc[Fire insurance implenentation]

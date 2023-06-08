@@ -1,4 +1,4 @@
-= Fire insurance implementation notices
+= Fire insurance implementation 
 
 == Overview
 

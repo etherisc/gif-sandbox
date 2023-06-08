@@ -1,5 +1,5 @@
 * xref:index.adoc[Overview]
 * xref:setup.adoc[Setup of the development environment]
 * xref:fireproduct.adoc[Fire insurance demo]
-* xref:fireproduct_implementation.adoc[Fire insurance implenentation notices]
+* xref:fireproduct_implementation.adoc[Fire insurance implenentation]
 
