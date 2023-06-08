@@ -12,7 +12,7 @@ from server.policy import Policy
 from server.product import GifInstance
 from server.request import Request, Response
 from server.watcher import FireOracleWatcher
-from scripts.util import contract_from_address, s2h
+from scripts.util import contract_from_address, s2h, get_package, s2b
 
 class Node(object):
 
@@ -67,6 +67,11 @@ class Node(object):
         self._fireProduct = contract_from_address(FireProduct, config.product_address)
         self._fireOracle = contract_from_address(FireOracle, config.oracle_address)
 
+        gif = get_package('gif-contracts')
+        registry = contract_from_address(gif.RegistryController, config.registry_address)
+        instanceServiceAddress = registry.getContract(s2b('InstanceService'))
+        self._instanceService = contract_from_address(gif.InstanceService, instanceServiceAddress)
+
         # create config for config get requests
         self._config = Config(
             registry_address = config.registry_address,
@@ -95,7 +100,19 @@ class Node(object):
         return list(self._policies.values())
 
     def getPolicy(self, process_id:str) -> Policy:        
-        return self._policies[process_id]
+        application = self._instanceService.getApplication(process_id)
+        policy = self._instanceService.getPolicy(process_id)
+        object_name = self._fireProduct.decodeApplicationParameterFromData(application['data'])
+        return Policy(
+            id = process_id,
+            object_name = object_name,
+            premium = application['premiumAmount'] / 10**6,
+            premium_paid = policy['premiumPaidAmount'] / 10**6,
+            sum_insured = application['sumInsuredAmount'] / 10**6,
+            application_state = application['state'],
+            policy_state = policy['state'],
+            claims_count = policy['claimsCount'],
+            payout_amount = policy['payoutAmount'] / 10**6)
 
     def applyForPolicy(self, object_name:str, object_value:int) -> str:
         tx = self._fireProduct.applyForPolicy(

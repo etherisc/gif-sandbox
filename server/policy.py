@@ -4,7 +4,10 @@ from pydantic import BaseModel
 class Policy(BaseModel):
     id:str = None
     object_name:str = None
-    request_id:int = None
     premium:int = None
+    premium_paid:int = None
     sum_insured:int = None
-    expired:bool = None
+    application_state:int = None
+    policy_state:int = None
+    claims_count:int = None
+    payout_amount:int = None
