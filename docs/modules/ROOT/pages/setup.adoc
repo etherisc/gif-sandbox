@@ -39,3 +39,13 @@ Start an interactive shell in the brownie container to execute commands
 docker exec -it gif-sandbox-brownie bash
 ----
 
+
+== Reset devcontainer 
+
+To completely reset a devcontainer instance follow these steps
+
+. Shutdown and remove the devcontainer and associated containers
+. Remove the `ganache-db` volume from the devcontainers ganache instance
+. Delete the file `gif_instance_address.txt` from the project sources
+. Restart the devcontainer as described above in the section `Start devcontainer`
+

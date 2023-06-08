@@ -175,13 +175,3 @@ Use the `POST /config` request to set the config. The method expects a json body
 }
 ----
 
-
-== Reset devcontainer 
-
-To completely reset a devcontainer instance follow these steps
-
-. Shutdown and remove the devcontainer and associated containers
-. Remove the `ganache-db` volume from the devcontainers ganache instance
-. Delete the file `gif_instance_address.txt` from the project sources
-. Restart the devcontainer as described above in the section `Start devcontainer`
-
