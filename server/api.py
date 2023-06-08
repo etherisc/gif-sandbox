@@ -13,13 +13,13 @@ from server.node import Node
 app = FastAPI()
 node = Node()
 
-@app.get('/requests', response_model=List[Request], tags=['Oracle'])
+@app.get('/requests', response_model=int, tags=['Oracle'])
 def get_oracle_requests():
     global node
     return node.requests
 
-@app.get('/requests/{request_id}', response_model=Request, tags=['Oracle'])
-def get_oracle_request(request_id:int):
+@app.get('/requests/{request_id}', response_model=int, tags=['Oracle'])
+def get_oracle_request(request_id:str):
     try:
         global node
         return node.getRequest(request_id)
@@ -82,7 +82,7 @@ def custom_openapi():
     openapi_schema = get_openapi(
         title = 'Fire Insurance API',
         version = '0.1.0',
-        description = node.info(),
+        description = "This is the OpenAPI for the Fire Insurance",
         routes = app.routes)
     
     app.openapi_schema = openapi_schema

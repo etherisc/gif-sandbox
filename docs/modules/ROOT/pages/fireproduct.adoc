@@ -100,7 +100,7 @@ from scripts.deploy_fire import all_in_1, verify_deploy, create_bundle, create_p
 verify_deploy(d, usdc, product)
 ----
 
-== Interacting with the fire insurance product
+== Interacting with the fire insurance product via console
 
 === Creating a new policy
 
@@ -144,6 +144,33 @@ oracle_tx.events
 # this will expire the policy - any claims following after expiration will be rejected due to the policy being expired
 product.expirePolicy(processId)
 ----
+
+== Interacting with the fire insurance product via api 
+
+Start the openapi server 
+
+[source,bash]
+----
+uvicorn server.api:app
+----
+
+and point your browser to http://localhost:8000/docs
+
+=== Initialize the openapi instance
+
+Use the `POST /config` request to set the config. The method expects a json body with the following structure (addresses can be found in the `gif_instance_address.txt` file and the mnemonic (`candy maple cake sugar pudding cream honey rich smooth crumble sweet treat`) is the preconfigured default mnemonic used in the ganache chain of the devcontainer).
+
+[source,json]
+----
+{
+    "registry_address": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+    "product_address": "0xC791F12F1Cea9B63D3F8C53e5B15ab90bcCe6796",
+    "oracle_address": "0x61271F03b0C18F6E15da03c21185d419d3f76b97",
+    "mnemonic": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
+}
+----
+
+
 
 == Reset devcontainer 
 

@@ -8,7 +8,7 @@ from brownie import network
 from brownie.network.contract import Contract
 from brownie.network.web3 import web3
 
-from brownie.project.Project import FireInsurance, FireOracle
+from brownie.project.Project import FireProduct, FireOracle
 
 from server.account import Account
 from server.product import GifInstance, Product
@@ -34,16 +34,6 @@ class Fire(Product):
             oracleOwner,
             instance,
             publishSource)
-
-    def info(self) -> str:
-        return '<ul>'\
-            '<li>Product contract {}</li>'\
-            '<li>Oracle contract {}</li>'\
-            '<li>Network \'{}\'</li>'\
-            '</ul>'.format(
-                self.product.contract.address,
-                self.oracle.contract.address,
-                network.show_active())
 
     def applyForPolicy(self, objectName:str, premium:int, customer:Account):
         logging.info('applyForPolicy({}, {})'.format(

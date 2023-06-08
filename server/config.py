@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 class Config(BaseModel):
+    registry_address: str = None
     product_address: str = None
     oracle_address: str = None
     mnemonic: str = None
@@ -10,4 +11,6 @@ class Config(BaseModel):
 
 class PostConfig(BaseModel):
     registry_address: str = None
+    product_address: str = None
+    oracle_address: str = None
     mnemonic: str = None

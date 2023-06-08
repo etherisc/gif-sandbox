@@ -2,6 +2,8 @@ import logging
 
 from typing import Dict, List
 
+from brownie.project.Project import FireProduct, FireOracle
+
 from server.account import Account
 from server.category import FireCategory
 from server.config import Config, PostConfig
@@ -10,14 +12,15 @@ from server.policy import Policy
 from server.product import GifInstance
 from server.request import Request, Response
 from server.watcher import FireOracleWatcher
+from scripts.util import contract_from_address, s2h
 
 class Node(object):
 
     # account numbers for sandbox accounts derived from config mnemonic
     INSTANCE_OWNER = 0
-    ORACLE_OWNER =1
-    PRODUCT_OWNER = 2
-    CUSTOMER = 3
+    ORACLE_OWNER = 5
+    PRODUCT_OWNER = 6
+    CUSTOMER = 8
 
     # initial capitalization of fire insurance product in wei
     INITIAL_CAPITALIZATION = 10**6
@@ -27,17 +30,11 @@ class Node(object):
         self._requests:Dict[int, Request] = {}
         self._config:Config = None
         self._instance = None
-        self._fire = None
-
-    def info(self) -> str:
-        fireInfo = ''
-
-        if self._fire:
-            fireInfo = self._fire.info()
-        
-        return 'Simple API server to interact with "Fire Insurance" '
-        + 'product of the GIF sandbox setup.'
-        + fireInfo
+        self._fireProduct = None
+        self._fireOracle = None
+        self._registryAddress = None
+        self._productAddress = None
+        self._oracleAddress = None
     
     @property
     def config(self) -> Config:
@@ -57,63 +54,41 @@ class Node(object):
         self._customer = account.getBrownieAccount(Node.CUSTOMER)
 
         # set up gif instance
-        registryAddress = config.registry_address
+        self._registryAddress = config.registry_address
         logging.info('access gif instance via registry at {}'.format(
-            registryAddress))
-
-        self._instance = GifInstance(
-            registryAddress, 
-            self._instanceOwner)
-
-        # deploy fire product on gif instance
-        logging.info('deploying fire insurance product')
-        self._fire = Fire(
-            self._oracleOwner,
-            self._productOwner,
-            self._instance)
-
-        # capitalisation of product contract
-        logging.info('initial capitalization by product owner with {} wei'.format(
-            Node.INITIAL_CAPITALIZATION))
+            self._registryAddress))
+        self._productAddress = config.product_address
+        logging.info('access fire insurance product at {}'.format(
+            self._productAddress))
+        self._oracleAddress = config.oracle_address
+        logging.info('access fire oracle at {}'.format(
+            self._oracleAddress))
         
-        self._fire.product.contract.deposit({
-            'from': self._productOwner,
-            'amount': Node.INITIAL_CAPITALIZATION})
-
-        logging.info('setting up log event watcher')
-        watcher = FireOracleWatcher(self._fire, self._requests)
+        self._fireProduct = contract_from_address(FireProduct, config.product_address)
+        self._fireOracle = contract_from_address(FireOracle, config.oracle_address)
 
         # create config for config get requests
         self._config = Config(
-            product_address = self._fire.product.contract.address,
-            oracle_address = self._fire.oracle.contract.address,
+            registry_address = config.registry_address,
+            product_address = config.product_address,
+            oracle_address = config.oracle_address,
             mnemonic = config.mnemonic,
             product_account_no = Node.PRODUCT_OWNER,
             oracle_account_no = Node.ORACLE_OWNER,
             customer_account_no = Node.CUSTOMER)
 
     @property
-    def requests(self) -> List[Request]:
-        return list(self._requests.values())
+    def requests(self) -> int:
+        return self._fireOracle.requestIds()
 
-    def getRequest(self, requestId:int) -> Request:
-        if requestId not in self._requests:
-            raise ValueError('no request with id {} available'.format(requestId))
-        
-        return self._requests[requestId]
+    def getRequest(self, objectName:str) -> int:
+        return self._fireOracle.requestId(objectName)
     
-    def sendResponse(self, requestId:int, fireCategory:FireCategory):
-        if requestId not in self._requests:
-            raise ValueError('no request with id {} available'.format(requestId))
-        
-        self._fire.respondToOracleRequest(
+    def sendResponse(self, requestId:int, fireCategory:FireCategory):        
+        self._fireOracle.respond(
             requestId, 
-            fireCategory,
-            self._oracleOwner)
-
-        self._requests[requestId].response = Response(
-            fire_category = fireCategory,
-            open = False)
+            s2h(fireCategory),
+            { "from" : self._oracleOwner })
     
     @property
     def policies(self) -> List[Policy]:
