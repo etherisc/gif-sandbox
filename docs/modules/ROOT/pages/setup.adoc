@@ -29,7 +29,7 @@ Run the brownie container
 
 [source,bash]
 ----
-docker run -v .:/sandbox --name gif-sandbox-brownie gif-sandbox-brownie
+docker run -v .:/sandbox -p 7545:7545 -p 8000:8000 --name gif-sandbox-brownie gif-sandbox-brownie
 ----
 
 Start an interactive shell in the brownie container to execute commands
@@ -37,6 +37,13 @@ Start an interactive shell in the brownie container to execute commands
 [source,bash]
 ----
 docker exec -it gif-sandbox-brownie bash
+----
+
+After that you need to add the ganache network to the brownie config once
+
+[source,bash]
+----
+brownie networks add Local ganache host=http://localhost:7545 chainid=1337
 ----
 
 

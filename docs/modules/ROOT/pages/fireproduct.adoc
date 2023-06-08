@@ -161,6 +161,8 @@ This should show the openapi documentation of the server, the documentation inte
 To start, you first need to initialize the openapi instance with the address of the deployed contracts.
 Then you can create a new policy, send an oracle response and expire the policy as described in the previous section.
 
+Also don't forget to fund the customer wallet and approve the treasury with a large amount before applying for a policy.
+
 === Initialize the openapi instance
 
 Use the `POST /config` request to set the config. The method expects a json body with the following structure (real addresses can be found in the `gif_instance_address.txt` file or via the `product`/`oracle` objects in the brownie console after deployment and the mnemonic (`candy maple cake sugar pudding cream honey rich smooth crumble sweet treat`) is the preconfigured default mnemonic used in the ganache chain of the devcontainer).

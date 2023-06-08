@@ -1,6 +1,7 @@
 FROM python:3.10-bullseye
 
 EXPOSE 7545
+EXPOSE 8000
 
 # install required dependencies
 # download required solidity compiler
@@ -10,12 +11,17 @@ RUN /tmp/install_solidity.sh
 RUN python -m pip install --upgrade pip
 # install brownie
 RUN pip install eth-brownie
-
+RUN pip install loguru
+RUN pip install fastapi
+RUN pip install "uvicorn[standard]"
 
 RUN useradd -m -s /bin/bash vscode
 RUN chown -R vscode:vscode /home/vscode
+RUN mkdir /ganache
+RUN chown -R vscode:vscode /ganache
 USER vscode
 
+SHELL ["/bin/bash", "-c"]
 # install nvm, node and ganache
 RUN curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 RUN echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
@@ -54,4 +60,11 @@ RUN wget -O /tmp/v${VERSION_CHAINLINK}.tar.gz https://github.com/smartcontractki
 VOLUME /sandbox
 WORKDIR /sandbox
 
-ENTRYPOINT ["sleep", "infinity"]
+#ENTRYPOINT ["sleep", "infinity"]
+ENTRYPOINT . ~/.bashrc &&  ganache-cli \
+    --mnemonic "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat" \
+    --chain.chainId 1337 \
+    --port 7545 \
+    --accounts 20 \
+    --database.dbPath /ganache \
+    -h "0.0.0.0"
