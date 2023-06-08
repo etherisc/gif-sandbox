@@ -21,7 +21,41 @@ The fire insurence product consists of three components (contracts):
 
 == FireProduct (`contracts/fire/FireProduct.sol`)
 
-TBD
+The `FireProduct` contract inherits from the GIF `Product` contract. 
+It provides three main functions (and also some helper functions which we will not discuss here)
+
+- `applyForPolicy`
+- `expirePolicy`
+- `oracleCallback`
+
+=== applyForPolicy
+
+The `applyForPolicy` function takes `objectName` and `objectValue` as parameters and used them to create a new policy for the given object. 
+It returns the `processId` (policy id) of the newly created policy as well as the `requestId` of the orcacle (which is required to provide oracle response). 
+
+The `applyForPolicy` function first calculates the premium for the policy based on the `objectValue`.
+Thereafter it calls https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L86[`_newApplication`] on the `Product` contract to create a new _Application_. 
+The https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L73[Application] is a data structure that holds all the information about the policy (e.g. the premium, the object name (encoded in the `data` field), the sum insured, etc.).
+
+Right after the application is created, the https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L86[`_underwrite`] function is called to underwrite and create the https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L82[`Policy`],  transfer the premium from the customer to the riskpool and set the policy into state _active_.
+The important part here is to note, that the policy is only active **after** `_underwrite` has been called **and** the premium transfer was _successful_. 
+If the premium transfer fails, the _Application_ will remain in state `Applied` and no `Policy` is created. 
+A separate `underwrite` function could be used to underwrite the policy at a later point in time, but this is not implemented in the fire insurance product.
+
+Finally the https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L228[`_request`] is called to trigger a fire observation request for the house on the fire oracle. 
+
+Its important to note that the `applyForPolicy` function is called by the customer and not by the underwriter.
+
+=== expirePolicy
+
+The `expirePolicy` function is very simple, it just calls the `_expire` function on the `Product` contract which sets the state of the `Policy` to _Expired_.
+No claims and payouts are possible after a policy has expired.
+
+The `expirePolicy` function must be called by the owner of the product.
+
+=== oracleCallback
+
+
 
 == FireRiskpool (`contracts/fire/FireRiskpool.sol`)
 
