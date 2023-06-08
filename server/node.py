@@ -94,37 +94,20 @@ class Node(object):
     def policies(self) -> List[Policy]:
         return list(self._policies.values())
 
-    def getPolicy(self, policyId:str) -> Policy:
-        if policyId not in self._policies:
-            raise ValueError('no policy with id {} available'.format(policyId))
-        
-        return self._policies[policyId]
+    def getPolicy(self, process_id:str) -> Policy:        
+        return self._policies[process_id]
 
-    def applyForPolicy(self, objectName:str, premium:int) -> str:
-        (policyId, requestId) = self._fire.applyForPolicy(
-            objectName, 
-            premium, 
-            self._customer)
-        
-        policy = Policy(
-            id = str(policyId),
-            object_name = objectName,
-            request_id = requestId,
-            premium = premium,
-            sum_insured = 100 * premium,
-            expired = False)
-        
-        logging.info('policy {}'.format(policy))
-        self._policies[policy.id] = policy
+    def applyForPolicy(self, object_name:str, object_value:int) -> str:
+        tx = self._fireProduct.applyForPolicy(
+            object_name, 
+            object_value * 10**6, 
+            { "from": self._customer })
+        process_id = tx.events['LogApplicationCreated'][0]['processId']
+        logging.info('processId {}'.format(process_id))
+        return process_id
 
-        return policy.id
-
-    def expirePolicy(self, policyId:str):
-        if policyId not in self._policies:
-            raise ValueError('no policy with id {} available'.format(policyId))
-        
-        self._fire.expirePolicy(
-            policyId, 
-            self._customer)
-        
-        self._policies[policyId].expired = True
+    def expirePolicy(self, processId:str):
+        self._fireProduct.expirePolicy(
+            processId, 
+            { "from" : self._productOwner })
+    

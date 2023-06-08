@@ -158,7 +158,7 @@ and point your browser to http://localhost:8000/docs
 
 === Initialize the openapi instance
 
-Use the `POST /config` request to set the config. The method expects a json body with the following structure (addresses can be found in the `gif_instance_address.txt` file and the mnemonic (`candy maple cake sugar pudding cream honey rich smooth crumble sweet treat`) is the preconfigured default mnemonic used in the ganache chain of the devcontainer).
+Use the `POST /config` request to set the config. The method expects a json body with the following structure (real addresses can be found in the `gif_instance_address.txt` file or via the `product`/`oracle` objects in the brownie console after deployment and the mnemonic (`candy maple cake sugar pudding cream honey rich smooth crumble sweet treat`) is the preconfigured default mnemonic used in the ganache chain of the devcontainer).
 
 [source,json]
 ----
@@ -169,7 +169,6 @@ Use the `POST /config` request to set the config. The method expects a json body
     "mnemonic": "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
 }
 ----
-
 
 
 == Reset devcontainer 

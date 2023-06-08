@@ -35,34 +35,29 @@ def respond_to_oracle_request(request_id:int, fire_category:FireCategory):
         logging.error(e)
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.get('/policies', response_model=List[Policy], tags=['Policy'])
-def get_fire_policies():
-    global node
-    return node.policies
-
 @app.post('/policies', response_model=str, tags=['Policy'])
-def apply_for_fire_policy(object_name: str, premium:int, response:Response):
+def apply_for_fire_policy(object_name: str, object_value:int, response:Response):
     try:
         global node
-        policyId = node.applyForPolicy(object_name, premium)
+        process_id = node.applyForPolicy(object_name, object_value)
         response.status_code = status.HTTP_201_CREATED
-        return policyId
+        return str(process_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get('/policies/{policy_id}', response_model=Policy, tags=['Policy'])
-def get_fire_policy(policy_id:str):
+@app.get('/policies/{process_id}', response_model=Policy, tags=['Policy'])
+def get_fire_policy(process_id:str):
     try:
         global node
-        return node.getPolicy(policy_id)
+        return node.getPolicy(process_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.put('/policies/{policy_id}/expire', tags=['Policy'])
-def expire_fire_policy(policy_id:str):
+@app.put('/policies/{process_id}/expire', tags=['Policy'])
+def expire_fire_policy(process_id:str):
     try:
         global node
-        node.expirePolicy(policy_id)
+        node.expirePolicy(process_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
