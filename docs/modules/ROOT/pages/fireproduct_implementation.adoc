@@ -48,14 +48,30 @@ Its important to note that the `applyForPolicy` function is called by the custom
 
 === expirePolicy
 
-The `expirePolicy` function is very simple, it just calls the `_expire` function on the `Product` contract which sets the state of the `Policy` to _Expired_.
+The `expirePolicy` function takes the `processId` (policy id) as parameter and expires that policy.
+
+To do that, it just calls the `_expire` function on the `Product` contract which sets the state of the `Policy` to _Expired_.
 No claims and payouts are possible after a policy has expired.
 
 The `expirePolicy` function must be called by the owner of the product.
 
 === oracleCallback
 
+The `oracleCallback` function takes the `requestId`, `processId` and (oracle) `response` as parameters and is called by the oracle to provide the product with the size of the damage done by the fire.
+As the method also includes claim and payout handling it leads to a completely automated claim and payout process which is executed together with the oracle response.
 
+The function decodes the size of the damage from the `response` and calls the internal `_handleClaim` function.
+
+`_handleClaim` first calculates the payout amount based on the size of the damage and the sum insured.
+
+If the payout amount is larger than zero, a new https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L94[Claim] is created by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L165[`_newClaim`] immediately followed by a call to https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L179[`_confirmClaim] to confirm the claim (which allows the payout to be processed).
+
+Then a new https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L103[`Payout`] is created by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L200[`_newPayout`] from the `Product` contract.
+Finally the payout amount is transferred from the riskpool to the customer by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L212[`_processPayout`] from the `Product` contract.
+
+The four sequential calls to create and confirm the claim as well as create and process the payout can be split into two separate transactions if the product required a more complex claim handling and payout process.
+
+This function can only be called by the oracle.
 
 == FireRiskpool (`contracts/fire/FireRiskpool.sol`)
 
