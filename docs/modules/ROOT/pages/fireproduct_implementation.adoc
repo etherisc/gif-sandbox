@@ -1,0 +1,33 @@
+= Fire insurance implementation notices
+
+== Overview
+
+The _fire insurance_ product is a very simple example implementation for a product on the GIF with very few parameters. 
+The idea is to provide a minimal implementation that can be used as a starting point for other products.
+
+The fire insurance can insure a house (identified by its _object name_ and _object value_) with a certain value against fire. 
+In case of a fire, the oracle will provide the product with the size of the damage done by the fire (_S_, _M_, _L_).
+Depending on the size of the damage, the product will pay out a certain amount of money 
+
+- _S_ - None,
+- _M_ - 20% of the object value
+- _L_ - 100% of the object value).
+
+The fire insurence product consists of three components (contracts):
+
+- The `FireProduct` contract is the main contract that implements the product logic
+- The `FireRiskpool` contract is the risk pool contract that holds the funds 
+- The `FireOracle` contract is the oracle contract that provides the product with data from the _outside world_ (in this case the size of the damage done by a fire)
+
+== FireProduct (`contracts/fire/FireProduct.sol`)
+
+TBD
+
+== FireRiskpool (`contracts/fire/FireRiskpool.sol`)
+
+TBD
+
+== FireOracle (`contracts/fire/FireOracle.sol`)
+
+TBD
+
