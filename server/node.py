@@ -86,8 +86,9 @@ class Node(object):
     def requests(self) -> int:
         return self._fireOracle.requestIds()
 
-    def getRequest(self, objectName:str) -> int:
-        return self._fireOracle.requestId(objectName)
+    def getRequest(self, object_name:str) -> int:
+        request_id = self._fireOracle.requestId(object_name)
+        return { "request_id" : request_id }
     
     def sendResponse(self, requestId:int, fireCategory:FireCategory):        
         self._fireOracle.respond(

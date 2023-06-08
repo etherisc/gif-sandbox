@@ -13,20 +13,20 @@ from server.node import Node
 app = FastAPI()
 node = Node()
 
-@app.get('/requests', response_model=int, tags=['Oracle'])
+@app.get('/requests', response_model=int, tags=['Oracle'], summary="Get the number of oracle requests")
 def get_oracle_requests():
     global node
     return node.requests
 
-@app.get('/requests/{request_id}', response_model=int, tags=['Oracle'])
-def get_oracle_request(request_id:str):
+@app.get('/requests/{object_name}', tags=['Oracle'], summary="Get the oracle request id a the given object name")
+def get_oracle_request(object_name:str):
     try:
         global node
-        return node.getRequest(request_id)
+        return node.getRequest(object_name)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
-@app.put('/requests/{request_id}/respond', tags=['Oracle'])
+@app.put('/requests/{request_id}/respond', tags=['Oracle'], summary="Send a response for an oracle request id")
 def respond_to_oracle_request(request_id:int, fire_category:FireCategory):
     try:
         global node

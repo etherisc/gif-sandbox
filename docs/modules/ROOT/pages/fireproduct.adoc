@@ -147,14 +147,19 @@ product.expirePolicy(processId)
 
 == Interacting with the fire insurance product via api 
 
-Start the openapi server 
+After the deployment of the contracts, its possible to interact with the product via the openapi interface instead of the brownie console. 
+Therefor start the openapi server 
 
 [source,bash]
 ----
 uvicorn server.api:app
 ----
 
-and point your browser to http://localhost:8000/docs
+and point your browser to http://localhost:8000/docs. 
+This should show the openapi documentation of the server, the documentation interface also allows interactive usage.
+
+To start, you first need to initialize the openapi instance with the address of the deployed contracts.
+Then you can create a new policy, send an oracle response and expire the policy as described in the previous section.
 
 === Initialize the openapi instance
 
