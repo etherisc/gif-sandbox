@@ -85,5 +85,28 @@ In the case of the fire insurance product this matching is very simple and the p
 
 == FireOracle (`contracts/fire/FireOracle.sol`)
 
-TBD
+The `FireOracle` contract inherits from the GIF `Oracle` contract. 
+The purpose of the oracle is to provide the product with data from the _outside world_ (in this case the size of the damage done by a fire). 
+It needs to send requests to outside systems and return their results. 
+
+In the case of the fire insurance product, the oracle will simulate a request to a _fire observation service_ by storing the request id and accepting the result via a call to the `respond` function.
+
+The main methods are
+
+- request
+- respond
+
+=== request
+
+Takes the `requestId` and `data` as parameters.
+
+The `data` parameter contains an _abi_ encoded string with the `objectName`. 
+The mapping from `objectName` to `requestId` is stored internally for later use in the `respond` function.
+
+=== respond
+
+Takes the `requestId` and `fireCategory` as parameters.
+
+The `fireCategory` is then _abi_ encoded to create the result data which is send back to the product via a call to the `respond` function on the `Oracle` contract.
+This call triggers the `oracleCallback` function on the product which will then handle the claim and payout process.
 
