@@ -23,7 +23,7 @@ The fire insurence product consists of three components (contracts):
 
 The following diagram shows the interaction between the different components of the fire insurance product and the GIF.
 
-image::images/fire_product_interaction.svg[Static,800]
+image::fire_product_interaction.svg[Static,800]
 
 
 == FireProduct (`contracts/fire/FireProduct.sol`)
