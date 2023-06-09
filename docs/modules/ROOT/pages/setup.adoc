@@ -17,6 +17,7 @@ Installing Docker on https://docs.docker.com/desktop/install/linux-install/[Linu
 . Open the repository in VS Code
 
 There are three ways to work with the sandbox (described below)
+
 - Use Github Codespaces
 - Use the devcontainer provided in the repository
 - Run the brownie container outside of vscode devcontainer
