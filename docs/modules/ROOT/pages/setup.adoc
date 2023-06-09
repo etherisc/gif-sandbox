@@ -31,7 +31,11 @@ There are three ways to work with the sandbox (described below)
 
 Github Codespaces is a new feature of Github that allows you to work with a repository in a container environment hosted by Github.
 To use Github Codespaces you need to have a Github account and you need to be logged in to Github.
-Open the https://github.com/etherisc/gif-sandbox[gif-sandbox repository] in your browser and click on the button `Code` and select `Open with Codespaces` from the dropdown menu.
+Open the https://github.com/etherisc/gif-sandbox[gif-sandbox repository] in your browser and click on the button `Code` and select `Open with Codespaces` from the dropdown menu. 
+This will open a new browser tab with the sandbox repository in a devcontainer hosted by Github.
+You can now work with the sandbox repository in the browser (or open the codespace in VS Code by clicking on the button `Open with VS Code` in the upper right corner of the browser tab).
+
+To improve performance of the codespace you can change the machine type in the codespace settings.
 
 === Run brownie container outside of vscode devcontainer
 
