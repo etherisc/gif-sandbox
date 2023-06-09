@@ -152,7 +152,7 @@ Therefor start the openapi server
 
 [source,bash]
 ----
-uvicorn server.api:app
+uvicorn server.api:app --host 0.0.0.0
 ----
 
 and point your browser to http://localhost:8000/docs. 

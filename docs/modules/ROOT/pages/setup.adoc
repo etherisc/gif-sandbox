@@ -10,14 +10,29 @@ Installing Docker on Windows is sometimes a struggle.
 Recommended Approach: Follow the installation instructions for https://docs.docker.com/desktop/install/windows-install/[Docker Desktop].
 Installing Docker on https://docs.docker.com/desktop/install/linux-install/[Linux] or https://docs.docker.com/desktop/install/mac-install/[Mac] should be straight forward.
 
-== Start the sandbox
+== Get the source code and editor ready
 
-When you have the container engine up and running, check out the code of the sandbox, open it in VS Code and start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_). Once the devcontainer is up and running and has finished compiling the contracts, you can start working with the code.
-**Alternatively you can also use Gihub Codespaces to work with the sandbox.**
+. Fork the https://github.com/etherisc/gif-sandbox[gif-sandbox repository] to your own github account (if you want to be able to commit changes)
+. Clone the repository to your local machine
+. Open the repository in VS Code
 
-If you cannot run the vscode devcontainer, then see below in chapter _Run brownie container outside of vscode devcontainer_ for instructions how to run the brownie container manually. When the container is started, continue with the instructions in section xref:firedemo.adoc[Fire insurance demo].
+There are three ways to work with the sandbox (described below)
+- Use Github Codespaces
+- Use the devcontainer provided in the repository
+- Run the brownie container outside of vscode devcontainer
 
-== Run brownie container outside of vscode devcontainer
+=== Use Github Codespaces
+
+Github Codespaces is a new feature of Github that allows you to work with a repository in a container environment hosted by Github.
+To use Github Codespaces you need to have a Github account and you need to be logged in to Github.
+Open the https://github.com/etherisc/gif-sandbox[gif-sandbox repository] in your browser and click on the button `Code` and select `Open with Codespaces` from the dropdown menu.
+
+=== Start the sandbox devcontainer
+
+- Start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_) 
+- Wait for the devcontainer to finish compiling and deploying the contracts
+
+=== Run brownie container outside of vscode devcontainer
 
 Build the brownie container 
 
@@ -32,18 +47,28 @@ Run the brownie container
 docker run -v .:/sandbox -p 7545:7545 -p 8000:8000 --name gif-sandbox-brownie gif-sandbox-brownie
 ----
 
-Start an interactive shell in the brownie container to execute commands
+Open another terminal (the above command will block you current terminal) and start an interactive shell in the brownie container to execute commands
 
 [source,bash]
 ----
 docker exec -it gif-sandbox-brownie bash
 ----
 
-After that you need to add the ganache network to the brownie config once
+After that you need to add the ganache network to the brownie config once and create an empty .env file
 
 [source,bash]
 ----
 brownie networks add Local ganache host=http://localhost:7545 chainid=1337
+touch .env
+----
+
+When you are done with the brownie container you can exit the interactive shell (type `exit`) and stop the container
+
+[source,bash]
+----
+docker stop gif-sandbox-brownie
+# to remove the container run
+docker rm gif-sandbox-brownie
 ----
 
 
