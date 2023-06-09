@@ -25,7 +25,7 @@
     "url": "https://github.com/etherisc/gif-sandbox/issues"
   },
   "dependencies": {
-    "@etherisc/gif-interface": "2.0.0-a8c9822",
+    "@etherisc/gif-interface": "2.0.0-rc.1-0",
     "@openzeppelin/contracts": "4.7.3"
   }
 }
