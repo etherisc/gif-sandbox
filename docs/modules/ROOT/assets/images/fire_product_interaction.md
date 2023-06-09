@@ -11,6 +11,7 @@ sequenceDiagram
     participant RW as RiskpoolWallet
     
     C ->> P: apply for policy
+    P ->> R: lock collateral
     P ->> P: creates Application
     P -->> T: trigger premium transfer
     C ->> RW: Treasury transfers premium
