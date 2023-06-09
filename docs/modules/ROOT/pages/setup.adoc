@@ -18,20 +18,20 @@ Installing Docker on https://docs.docker.com/desktop/install/linux-install/[Linu
 
 There are three ways to work with the sandbox (described below)
 
-- Use Github Codespaces
 - Use the devcontainer provided in the repository
+- Use Github Codespaces
 - Run the brownie container outside of vscode devcontainer
+
+=== Start the sandbox devcontainer
+
+- Start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_) 
+- Wait for the devcontainer to finish compiling and deploying the contracts
 
 === Use Github Codespaces
 
 Github Codespaces is a new feature of Github that allows you to work with a repository in a container environment hosted by Github.
 To use Github Codespaces you need to have a Github account and you need to be logged in to Github.
 Open the https://github.com/etherisc/gif-sandbox[gif-sandbox repository] in your browser and click on the button `Code` and select `Open with Codespaces` from the dropdown menu.
-
-=== Start the sandbox devcontainer
-
-- Start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_) 
-- Wait for the devcontainer to finish compiling and deploying the contracts
 
 === Run brownie container outside of vscode devcontainer
 
