@@ -19,6 +19,13 @@ The fire insurence product consists of three components (contracts):
 - The `FireRiskpool` contract is the risk pool contract that holds the funds 
 - The `FireOracle` contract is the oracle contract that provides the product with data from the _outside world_ (in this case the size of the damage done by a fire)
 
+== Interaction diagram
+
+The following diagram shows the interaction between the different components of the fire insurance product and the GIF.
+
+image::images/fire_product_interaction.svg[Static,800]
+
+
 == FireProduct (`contracts/fire/FireProduct.sol`)
 
 The `FireProduct` contract inherits from the GIF `Product` contract. 
