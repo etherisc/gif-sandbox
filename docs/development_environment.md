@@ -29,7 +29,7 @@ The following components must be installed on your machine
 
 ### Github Codespaces
 
-If you have access to [Github Codespaces](https://github.com/codespaces) it gets even easiert. You can create a new codespace by browsing to one of the above repositories then then click on `Code` -> `Create codespace on master` and this will create and launch a fully configured IDE workspace for the repository. 
+If you have access to [Github Codespaces](https://github.com/codespaces) it gets even easiert. You can create a new codespace by browsing to one of the above repositories then then click on `Code` -> `Create codespace on main` and this will create and launch a fully configured IDE workspace for the repository. 
 
 ![](images/github_codespaces.png)
 
