@@ -72,4 +72,9 @@ RUN wget -O /tmp/v${VERSION_CHAINLINK}.tar.gz https://github.com/smartcontractki
 
 RUN sudo mkdir /gif-contracts && sudo chown vscode /gif-contracts
 
+RUN curl -L https://foundry.paradigm.xyz | bash
+RUN echo 'export PATH="$PATH:/home/vscode/.foundry/bin"' >> ~/.zshrc
+RUN /home/vscode/.foundry/bin/foundryup
+
+
 WORKDIR /workspace
