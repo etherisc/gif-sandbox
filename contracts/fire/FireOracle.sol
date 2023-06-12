@@ -46,6 +46,7 @@ contract FireOracle is Oracle {
 
     function respond(uint256 requestId, bytes1 fireCategory) 
         external
+        onlyOwner
     {
         // input validation
         require(
