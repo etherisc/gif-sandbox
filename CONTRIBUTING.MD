@@ -47,6 +47,7 @@ Commit the changes once you are happy with them.
 ### Pull Request
 
 When you're finished with the changes, create a pull request, also known as a PR.
+- Please make sure you have read and signed our CLA (contributor license agreement) before you submit your first PR. You can sign the CLA by adding a comment to the PR with the following text: `I have read the CLA Document and I hereby sign the CLA`. Our CLA assistant will add comment to your PR as soon as you open it in case you have not signed yet.
 - Don't forget to [link PR to issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue) if you are solving one.
 - Enable the checkbox to [allow maintainer edits](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/allowing-changes-to-a-pull-request-branch-created-from-a-fork) so the branch can be updated for a merge.
 Once you submit your PR, a Docs team member will review your proposal. We may ask questions or request additional information.
