@@ -10,3 +10,7 @@ The fire insurance product is a simple example product that can be used to demon
 It is a simple parametric insurance product that pays out an amount of USDC if a fire event is triggered by the oracle depending on the fire category.
 
 Detailed setup and usage instructions for the sandbox can be found on the [Sandbox documenation page](https://docs.etherisc.com/sandbox/). 
+
+## Contributing
+
+See the [contributing guide](./CONTRIBUTING.MD) for detailed instructions on how to get started with our project.
