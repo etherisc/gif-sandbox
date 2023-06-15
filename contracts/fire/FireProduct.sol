@@ -226,8 +226,8 @@ struct Application {
                 payoutAmount
             );
 
-            _expirePolicy(policyId);
-            _closePolicy(policyId);
+            _expire(policyId);
+            _close(policyId);
         }
     }
 
