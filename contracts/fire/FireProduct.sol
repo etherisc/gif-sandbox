@@ -225,6 +225,9 @@ struct Application {
                 payoutId,
                 payoutAmount
             );
+
+            _expire(policyId);
+            _close(policyId);
         }
     }
 

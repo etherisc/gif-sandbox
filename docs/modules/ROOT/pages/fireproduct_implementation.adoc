@@ -74,7 +74,8 @@ The function decodes the size of the damage from the `response` and calls the in
 If the payout amount is larger than zero, a new https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L94[Claim] is created by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L165[`_newClaim`] immediately followed by a call to https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L179[`_confirmClaim] to confirm the claim (which allows the payout to be processed).
 
 Then a new https://github.com/etherisc/gif-interface/blob/develop/contracts/modules/IPolicy.sol#L103[`Payout`] is created by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L200[`_newPayout`] from the `Product` contract.
-Finally the payout amount is transferred from the riskpool to the customer by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L212[`_processPayout`] from the `Product` contract.
+After that the payout amount is transferred from the riskpool to the customer by calling https://github.com/etherisc/gif-interface/blob/develop/contracts/components/Product.sol#L212[`_processPayout`] from the `Product` contract.
+Finally the policy is expired and closed by calling the respectve methods on the base class.
 
 The four sequential calls to create and confirm the claim as well as create and process the payout can be split into two separate transactions if the product required a more complex claim handling and payout process.
 
