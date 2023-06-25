@@ -1,0 +1,23 @@
+= Fire insurance registration  
+
+== Overview
+
+In order to work with _GIF instance_ each component of _fire insurance_ undergoes registration. 
+Registration procedure consists of component proposal tx (by component _owner_) followed by component approval tx (by _GIF instance operator_) with consequent configurations.
+
+Each component has _owner_ (implements `getOwner()` method) and _type_ (implements `getType()` method).
+Prior to registration, _GIF instance operator_ grants component _owner_ a role correspondent to component _type_. 
+
+Components registration order is important: starting with `FireOracle`, followed by `FireRiskpool` and finishing with `FireProduct`. 
+
+== Registration diagrams 
+
+Following diagrams show registrations of components
+
+image::fire_oracle_registration.svg[Static,800]
+
+image::fire_riskpool_registration.svg[Static,800]
+
+image::fire_product_registration.svg[Static,800]
+
+
