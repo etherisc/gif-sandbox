@@ -8,10 +8,10 @@ sequenceDiagram
     participant O as FireOracle
  
     
-    IO ->> G: grant role to OracleProvider
     OP->>+ O: deploy FireOracle contract
+    IO ->> G: grant role to OracleProvider
     OP ->>+ G: propose FireOracle
-    G -->>- O: after propose callback
+    G ->>- O: after propose callback
     IO ->>+ G: approve FireOracle
-    G -->>- O: after approve callback
+    G ->>- O: after approve callback
 ```
