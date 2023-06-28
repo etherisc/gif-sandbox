@@ -2,7 +2,7 @@
 
 == Overview
 
-In order to work with _GIF instance_ each component of _fire insurance_ undergoes registration. 
+In order to work with _GIF instance_ each component of _fire insurance_ needs to undergo registration. 
 Registration procedure consists of component proposal tx (by component _owner_) followed by component approval tx (by _GIF instance operator_) with consequent configurations.
 
 Each component has _owner_ (implements `getOwner()` method) and _type_ (implements `getType()` method).
