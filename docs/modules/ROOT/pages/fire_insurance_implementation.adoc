@@ -11,7 +11,7 @@ Depending on the size of the damage, the product will pay out a certain amount o
 
 - _S_ - None,
 - _M_ - 20% of the object value
-- _L_ - 100% of the object value).
+- _L_ - 100% of the object value.
 
 The fire insurence product consists of three components (contracts):
 

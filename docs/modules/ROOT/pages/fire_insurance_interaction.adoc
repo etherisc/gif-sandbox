@@ -1,4 +1,4 @@
-= Fire insurance product
+= Compile, deploy and interact
 
 :toc:
 
