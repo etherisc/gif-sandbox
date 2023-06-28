@@ -6,7 +6,7 @@ In order to work with _GIF instance_ each component of _fire insurance_ undergoe
 Registration procedure consists of component proposal tx (by component _owner_) followed by component approval tx (by _GIF instance operator_) with consequent configurations.
 
 Each component has _owner_ (implements `getOwner()` method) and _type_ (implements `getType()` method).
-Prior to registration, _GIF instance operator_ grants component _owner_ a role correspondent to component _type_. 
+Prior to registration, _GIF instance operator_ grants component _owner_ a role correspondent to component _type_. This role is required to be able to propose a component. 
 
 Components registration order is important: starting with `FireOracle`, followed by `FireRiskpool` and finishing with `FireProduct`. 
 
