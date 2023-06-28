@@ -6,7 +6,6 @@ sequenceDiagram
     actor IO as InstanceOperator
     participant G as GIF
     participant P as FireProduct
-    participant R as FireRiskpool
     
     PO ->>+ P: deploy FireProduct contract
     IO ->> G: grant role to ProductOwner
@@ -15,10 +14,10 @@ sequenceDiagram
     IO ->>+ G: approve FireProduct
     G ->> P: get PolicyFlow
     G ->> G: sets PolicyFlow for Product
-    G ->>- P: after approve callback
+    G ->> P: after approve callback
     G ->> P: get Riskpool ID
-    G ->> G: sets Riskpool for Product
-    IO ->> G: set Token for FireProduct
-    G ->> G: sets Token for Product and assigned Riskpool
+    G ->>- G: sets Riskpool for Product
+    IO ->>+ G: set Token for FireProduct
+    G ->>- G: sets Token for Product and assigned Riskpool
     IO ->> G: set premium fees for FireProduct
 ```
