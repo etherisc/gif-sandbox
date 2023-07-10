@@ -4,3 +4,6 @@
 [submodule "lib/gif-interface"]
 	path = lib/gif-interface
 	url = https://github.com/etherisc/gif-interface
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
