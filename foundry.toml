@@ -7,6 +7,7 @@ test = "tests_foundry"
 # See more config options https://github.com/foundry-rs/foundry/tree/master/config
 
 remappings = [
+    "@etherisc/gif-interface/=lib/gif-interface/",
     "@openzeppelin/=lib/openzeppelin-contracts/",
     "@forgestd/=lib/forge-std/src/",
 ]
