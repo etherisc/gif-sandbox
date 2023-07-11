@@ -26,6 +26,7 @@ There are three ways to work with the sandbox (described below)
 
 - Start the devcontainer (either wait for the pop to build the devcontainer or open the command list (F1) and select the command _Dev Containers: Rebuild and reopen in container_) 
 - Wait for the devcontainer to finish compiling and deploying the contracts
+- The devcontainer setup includes a second container with a ganache instance that is started automatically. A GIF instance is deployed to this ganache instance and the address of the GIF instance is stored in the file `gif_instance_address.txt` in the project root. This GIF instance can also be used by other (newly developed) products/riskpools/oracles for testing purposes. 
 
 === Use Github Codespaces
 
