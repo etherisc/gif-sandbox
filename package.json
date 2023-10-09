@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "@etherisc/gif-interface": "2.0.0-a8c9822",
-    "@openzeppelin/contracts": "4.7.3"
+    "@openzeppelin/contracts": "5.0.0"
   }
 }
